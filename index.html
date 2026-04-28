@@ -46,18 +46,67 @@
 
     /* ── Tab bar ── */
     .tabs {
-      display: grid; grid-template-columns: repeat(4, 1fr);
+      display: grid; grid-template-columns: repeat(5, 1fr);
       gap: 3px; background: var(--surface);
       border: 1px solid var(--border); border-radius: 14px;
       padding: 3px; margin-bottom: 1rem;
     }
     .tab {
       border: none; background: transparent; color: var(--text2);
-      font-size: 0.72rem; font-weight: 500; padding: 7px 4px;
+      font-size: 0.6rem; font-weight: 500; padding: 7px 2px;
       border-radius: 10px; cursor: pointer; transition: all 0.18s ease;
+      letter-spacing: -0.01em;
     }
     .tab.active { background: var(--accent); color: #fff; }
     .tab:not(.active):hover { color: var(--text1); background: rgba(255,255,255,0.06); }
+
+    /* ── Tooltip ── */
+    #tip {
+      position: fixed; z-index: 9999;
+      background: #0d0d14; border: 1px solid var(--accent);
+      border-radius: 12px; padding: 0.7rem 0.85rem;
+      max-width: 240px; min-width: 150px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.75);
+      pointer-events: none; display: none;
+      opacity: 0; transform: translateY(6px);
+      transition: opacity 0.14s, transform 0.14s;
+    }
+    #tip.show { opacity: 1; transform: translateY(0); }
+    .tip-t { font-size: 0.78rem; font-weight: 700; color: var(--accent2); margin-bottom: 4px; }
+    .tip-d { font-size: 0.7rem;  color: var(--text1); line-height: 1.45; margin-bottom: 5px; }
+    .tip-e { font-size: 0.66rem; color: var(--text2); font-family: 'SF Mono',monospace;
+             background: rgba(255,255,255,0.06); border-radius: 5px;
+             padding: 3px 7px; border-left: 2px solid var(--accent); display: block; }
+
+    /* ── Statistics ── */
+    .stat-section { margin-bottom: 0.85rem; }
+    .stat-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+    .stat-grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.45rem; }
+    .stat-item .sl { font-size: 0.62rem; color: var(--text2); margin-bottom: 1px; }
+    .stat-item .sv { font-size: 1.05rem; font-weight: 600; }
+    .stat-item .sv.lg { font-size: 1.25rem; }
+    textarea {
+      width: 100%; background: var(--surface); border: 1px solid var(--border);
+      color: var(--text1); border-radius: 9px; padding: 0.5rem 0.75rem;
+      font-size: 0.85rem; outline: none; resize: vertical; min-height: 72px;
+      font-family: 'SF Mono','Fira Code',monospace; transition: border-color 0.18s;
+      -webkit-appearance: none; appearance: none;
+    }
+    textarea:focus { border-color: var(--accent); }
+    .norm-mode { display: flex; gap: 5px; margin-bottom: 0.65rem; }
+    .norm-btn {
+      flex: 1; border: 1px solid var(--border); border-radius: 8px;
+      background: var(--surface); color: var(--text2);
+      font-size: 0.65rem; font-weight: 500; padding: 5px 4px;
+      cursor: pointer; transition: all 0.15s; text-align: center;
+    }
+    .norm-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    #reg-svg { width: 100%; margin-top: 0.5rem; display: block; border-radius: 10px; }
+    .prob-bar {
+      height: 6px; border-radius: 3px; background: var(--border);
+      margin-top: 4px; overflow: hidden;
+    }
+    .prob-fill { height: 100%; background: var(--accent); border-radius: 3px; transition: width 0.3s; }
 
     /* ── Panels ── */
     .panel { display: none; }
@@ -318,6 +367,7 @@
     <button class="tab"        onclick="switchMode('sci')"   id="tab-sci">Científica</button>
     <button class="tab"        onclick="switchMode('fin')"   id="tab-fin">Financiera</button>
     <button class="tab"        onclick="switchMode('conv')"  id="tab-conv">Medidas</button>
+    <button class="tab"        onclick="switchMode('stat')"  id="tab-stat">Estadíst.</button>
   </div>
 
   <!-- ═══════════════════════ BÁSICA ═══════════════════════ -->
@@ -327,15 +377,15 @@
       <div class="display-val"  id="b-val">0</div>
     </div>
     <div class="grid-basic grid-mem">
-      <button class="btn btn-fn h-btn-sm" onclick="memClear()">MC</button>
-      <button class="btn btn-fn h-btn-sm" onclick="memRecall()">MR</button>
-      <button class="btn btn-fn h-btn-sm" onclick="memAdd()">M+</button>
-      <button class="btn btn-fn h-btn-sm" onclick="memSub()">M−</button>
+      <button class="btn btn-fn h-btn-sm" onclick="memClear()"  data-tip="mc">MC</button>
+      <button class="btn btn-fn h-btn-sm" onclick="memRecall()" data-tip="mr">MR</button>
+      <button class="btn btn-fn h-btn-sm" onclick="memAdd()"    data-tip="mplus">M+</button>
+      <button class="btn btn-fn h-btn-sm" onclick="memSub()"    data-tip="mminus">M−</button>
     </div>
     <div class="grid-basic grid-main">
-      <button class="btn btn-clr h-btn" onclick="bClear()">AC</button>
-      <button class="btn btn-fn  h-btn" onclick="bSign()">+/−</button>
-      <button class="btn btn-fn  h-btn" onclick="bPct()">%</button>
+      <button class="btn btn-clr h-btn" onclick="bClear()" data-tip="ac">AC</button>
+      <button class="btn btn-fn  h-btn" onclick="bSign()"  data-tip="sign">+/−</button>
+      <button class="btn btn-fn  h-btn" onclick="bPct()"   data-tip="pct">%</button>
       <button class="btn btn-op  h-btn" onclick="bOp('/')">÷</button>
       <button class="btn h-btn" onclick="bDigit('7')">7</button>
       <button class="btn h-btn" onclick="bDigit('8')">8</button>
@@ -368,45 +418,45 @@
       <button class="btn btn-fn h-btn-sm" style="padding:0 14px;font-size:1rem" onclick="sBksp()">⌫</button>
     </div>
     <div class="grid-sci">
-      <button class="btn btn-fn h-sci" onclick="sFunc('sin')">sin</button>
-      <button class="btn btn-fn h-sci" onclick="sFunc('cos')">cos</button>
-      <button class="btn btn-fn h-sci" onclick="sFunc('tan')">tan</button>
-      <button class="btn btn-fn h-sci" onclick="sFunc('log')">log</button>
-      <button class="btn btn-fn h-sci" onclick="sFunc('ln')">ln</button>
-      <button class="btn btn-fn h-sci" style="font-size:.7rem" onclick="sFunc('asin')">sin⁻¹</button>
-      <button class="btn btn-fn h-sci" style="font-size:.7rem" onclick="sFunc('acos')">cos⁻¹</button>
-      <button class="btn btn-fn h-sci" style="font-size:.7rem" onclick="sFunc('atan')">tan⁻¹</button>
-      <button class="btn btn-fn h-sci" onclick="sFunc('pow2')">x²</button>
-      <button class="btn btn-fn h-sci" onclick="sFunc('pow3')">x³</button>
-      <button class="btn btn-fn h-sci" onclick="sFunc('sqrt')">√x</button>
-      <button class="btn btn-fn h-sci" onclick="sFunc('cbrt')">∛x</button>
-      <button class="btn btn-fn h-sci" onclick="sOp('**')">xʸ</button>
-      <button class="btn btn-fn h-sci" onclick="sFunc('10x')">10ˣ</button>
-      <button class="btn btn-fn h-sci" onclick="sFunc('ex')">eˣ</button>
-      <button class="btn btn-fn h-sci" onclick="sFunc('fact')">n!</button>
-      <button class="btn btn-fn h-sci" onclick="sFunc('pi')">π</button>
-      <button class="btn btn-fn h-sci" onclick="sFunc('eConst')">e</button>
-      <button class="btn btn-fn h-sci" onclick="sFunc('inv')">1/x</button>
-      <button class="btn btn-fn h-sci" onclick="sFunc('abs')">|x|</button>
-      <button class="btn btn-clr h-sci" onclick="sClear()">AC</button>
-      <button class="btn btn-fn  h-sci" onclick="sSign()">+/−</button>
-      <button class="btn btn-fn  h-sci" onclick="sPct()">%</button>
-      <button class="btn btn-fn  h-sci" onclick="sMod()">mod</button>
+      <button class="btn btn-fn h-sci" onclick="sFunc('sin')"   data-tip="sin">sin</button>
+      <button class="btn btn-fn h-sci" onclick="sFunc('cos')"   data-tip="cos">cos</button>
+      <button class="btn btn-fn h-sci" onclick="sFunc('tan')"   data-tip="tan">tan</button>
+      <button class="btn btn-fn h-sci" onclick="sFunc('log')"   data-tip="log">log</button>
+      <button class="btn btn-fn h-sci" onclick="sFunc('ln')"    data-tip="ln">ln</button>
+      <button class="btn btn-fn h-sci" style="font-size:.7rem" onclick="sFunc('asin')" data-tip="asin">sin⁻¹</button>
+      <button class="btn btn-fn h-sci" style="font-size:.7rem" onclick="sFunc('acos')" data-tip="acos">cos⁻¹</button>
+      <button class="btn btn-fn h-sci" style="font-size:.7rem" onclick="sFunc('atan')" data-tip="atan">tan⁻¹</button>
+      <button class="btn btn-fn h-sci" onclick="sFunc('pow2')"  data-tip="pow2">x²</button>
+      <button class="btn btn-fn h-sci" onclick="sFunc('pow3')"  data-tip="pow3">x³</button>
+      <button class="btn btn-fn h-sci" onclick="sFunc('sqrt')"  data-tip="sqrt">√x</button>
+      <button class="btn btn-fn h-sci" onclick="sFunc('cbrt')"  data-tip="cbrt">∛x</button>
+      <button class="btn btn-fn h-sci" onclick="sOp('**')"      data-tip="xpowy">xʸ</button>
+      <button class="btn btn-fn h-sci" onclick="sFunc('10x')"   data-tip="10x">10ˣ</button>
+      <button class="btn btn-fn h-sci" onclick="sFunc('ex')"    data-tip="ex">eˣ</button>
+      <button class="btn btn-fn h-sci" onclick="sFunc('fact')"  data-tip="fact">n!</button>
+      <button class="btn btn-fn h-sci" onclick="sFunc('pi')"    data-tip="pi">π</button>
+      <button class="btn btn-fn h-sci" onclick="sFunc('eConst')" data-tip="econ">e</button>
+      <button class="btn btn-fn h-sci" onclick="sFunc('inv')"   data-tip="inv">1/x</button>
+      <button class="btn btn-fn h-sci" onclick="sFunc('abs')"   data-tip="absx">|x|</button>
+      <button class="btn btn-clr h-sci" onclick="sClear()" data-tip="ac">AC</button>
+      <button class="btn btn-fn  h-sci" onclick="sSign()" data-tip="sign">+/−</button>
+      <button class="btn btn-fn  h-sci" onclick="sPct()"  data-tip="pct">%</button>
+      <button class="btn btn-fn  h-sci" onclick="sMod()"  data-tip="mod">mod</button>
       <button class="btn btn-op  h-sci" onclick="sOp('/')">÷</button>
       <button class="btn h-sci" onclick="sDigit('7')">7</button>
       <button class="btn h-sci" onclick="sDigit('8')">8</button>
       <button class="btn h-sci" onclick="sDigit('9')">9</button>
-      <button class="btn btn-fn h-sci" onclick="sFunc('log2')">log₂</button>
+      <button class="btn btn-fn h-sci" onclick="sFunc('log2')" data-tip="log2">log₂</button>
       <button class="btn btn-op h-sci" onclick="sOp('*')">×</button>
       <button class="btn h-sci" onclick="sDigit('4')">4</button>
       <button class="btn h-sci" onclick="sDigit('5')">5</button>
       <button class="btn h-sci" onclick="sDigit('6')">6</button>
-      <button class="btn btn-fn h-sci" onclick="sFunc('recip')">1/x</button>
+      <button class="btn btn-fn h-sci" onclick="sFunc('recip')" data-tip="inv">1/x</button>
       <button class="btn btn-op h-sci" onclick="sOp('-')">−</button>
       <button class="btn h-sci" onclick="sDigit('1')">1</button>
       <button class="btn h-sci" onclick="sDigit('2')">2</button>
       <button class="btn h-sci" onclick="sDigit('3')">3</button>
-      <button class="btn btn-fn h-sci" onclick="sFunc('sqrt')">√</button>
+      <button class="btn btn-fn h-sci" onclick="sFunc('sqrt')"  data-tip="sqrt">√</button>
       <button class="btn btn-op h-sci" onclick="sOp('+')">+</button>
       <button class="btn h-sci" style="grid-column:span 2" onclick="sDigit('0')">0</button>
       <button class="btn h-sci" onclick="sDot()">.</button>
@@ -913,7 +963,199 @@
     </div>
   </div>
 
+  <!-- ═══════════════════════ ESTADÍSTICA ═══════════════════════ -->
+  <div class="panel" id="panel-stat">
+    <div class="ftabs">
+      <button class="ftab active" id="stab-desc" onclick="switchStat('desc')">Descriptiva</button>
+      <button class="ftab"        id="stab-comb" onclick="switchStat('comb')">Combinatoria</button>
+      <button class="ftab"        id="stab-norm" onclick="switchStat('norm')">Normal</button>
+      <button class="ftab"        id="stab-regr" onclick="switchStat('regr')">Regresión</button>
+    </div>
+
+    <!-- Descriptiva -->
+    <div class="fpanel active" id="spanel-desc">
+      <div class="field">
+        <label>Datos (coma, espacio o Enter como separador)</label>
+        <textarea id="st-data" placeholder="2, 4, 6, 8, 10, 12" oninput="calcDesc()"></textarea>
+      </div>
+      <div id="desc-out" style="display:none">
+        <div class="result-card" style="margin-bottom:.5rem">
+          <div class="stat-grid3">
+            <div class="stat-item"><div class="sl">n (datos)</div><div class="sv lg" id="ds-n" style="color:var(--accent2)"></div></div>
+            <div class="stat-item"><div class="sl">Suma (Σ)</div><div class="sv" id="ds-sum"></div></div>
+            <div class="stat-item"><div class="sl">Media (x̄)</div><div class="sv" id="ds-mean" style="color:var(--green)"></div></div>
+            <div class="stat-item"><div class="sl">Mediana</div><div class="sv" id="ds-median"></div></div>
+            <div class="stat-item"><div class="sl">Moda</div><div class="sv" id="ds-mode"></div></div>
+            <div class="stat-item"><div class="sl">Rango</div><div class="sv" id="ds-range"></div></div>
+            <div class="stat-item"><div class="sl">Mínimo</div><div class="sv" id="ds-min"></div></div>
+            <div class="stat-item"><div class="sl">Máximo</div><div class="sv" id="ds-max"></div></div>
+            <div class="stat-item"><div class="sl">CV (%)</div><div class="sv" id="ds-cv"></div></div>
+          </div>
+        </div>
+        <div class="result-card" style="margin-bottom:.5rem">
+          <div style="font-size:.62rem;color:var(--text2);margin-bottom:.4rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em">Dispersión</div>
+          <div class="stat-grid2">
+            <div class="stat-item"><div class="sl">Desv. est. población (σ)</div><div class="sv" id="ds-sigmap" style="color:var(--accent2)"></div></div>
+            <div class="stat-item"><div class="sl">Desv. est. muestra (s)</div><div class="sv" id="ds-sigmas"></div></div>
+            <div class="stat-item"><div class="sl">Varianza población (σ²)</div><div class="sv" id="ds-varp"></div></div>
+            <div class="stat-item"><div class="sl">Varianza muestra (s²)</div><div class="sv" id="ds-vars"></div></div>
+            <div class="stat-item"><div class="sl">Q1 (percentil 25)</div><div class="sv" id="ds-q1"></div></div>
+            <div class="stat-item"><div class="sl">Q3 (percentil 75)</div><div class="sv" id="ds-q3"></div></div>
+            <div class="stat-item"><div class="sl">IQR (Q3 − Q1)</div><div class="sv" id="ds-iqr"></div></div>
+            <div class="stat-item"><div class="sl">Sesgo (asimetría)</div><div class="sv" id="ds-skew"></div></div>
+          </div>
+        </div>
+        <div class="result-card">
+          <div style="font-size:.62rem;color:var(--text2);margin-bottom:.4rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em">Datos ordenados</div>
+          <div id="ds-sorted" style="font-size:.72rem;color:var(--text2);font-family:monospace;word-break:break-all;line-height:1.6"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Combinatoria -->
+    <div class="fpanel" id="spanel-comb">
+      <div class="sec-divider">Combinaciones & Permutaciones</div>
+      <div class="field-row">
+        <div class="field"><label>n (total elementos)</label>
+          <input type="number" id="cb-n" placeholder="10" min="0" oninput="calcComb()"></div>
+        <div class="field"><label>r (elementos elegidos)</label>
+          <input type="number" id="cb-r" placeholder="3" min="0" oninput="calcComb()"></div>
+      </div>
+      <div class="result-card" id="cb-out" style="display:none">
+        <div class="stat-grid3">
+          <div class="stat-item"><div class="sl">nCr — Combinaciones</div><div class="sv lg" id="cb-ncr" style="color:var(--green)"></div></div>
+          <div class="stat-item"><div class="sl">nPr — Permutaciones</div><div class="sv lg" id="cb-npr" style="color:var(--accent2)"></div></div>
+          <div class="stat-item"><div class="sl">n! — Factorial</div><div class="sv" id="cb-nfact"></div></div>
+          <div class="stat-item"><div class="sl">r!</div><div class="sv" id="cb-rfact"></div></div>
+          <div class="stat-item"><div class="sl">(n−r)!</div><div class="sv" id="cb-nrfact"></div></div>
+        </div>
+      </div>
+
+      <div class="sec-divider">Distribución Binomial P(X = k)</div>
+      <div class="field-row3">
+        <div class="field"><label>n (ensayos)</label>
+          <input type="number" id="bn-n" placeholder="20" min="1" oninput="calcBinom()"></div>
+        <div class="field"><label>k (éxitos)</label>
+          <input type="number" id="bn-k" placeholder="5" min="0" oninput="calcBinom()"></div>
+        <div class="field"><label>p (probabilidad)</label>
+          <input type="number" id="bn-p" placeholder="0.3" step="0.01" min="0" max="1" oninput="calcBinom()"></div>
+      </div>
+      <div class="result-card" id="bn-out" style="display:none">
+        <div class="stat-grid3">
+          <div class="stat-item"><div class="sl">P(X = k)</div><div class="sv lg" id="bn-exact" style="color:var(--green)"></div></div>
+          <div class="stat-item"><div class="sl">P(X ≤ k)</div><div class="sv" id="bn-cum" style="color:var(--accent2)"></div></div>
+          <div class="stat-item"><div class="sl">P(X ≥ k)</div><div class="sv" id="bn-upper"></div></div>
+          <div class="stat-item"><div class="sl">Media (μ = np)</div><div class="sv" id="bn-mean"></div></div>
+          <div class="stat-item"><div class="sl">Desv. est. (σ)</div><div class="sv" id="bn-std"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Normal -->
+    <div class="fpanel" id="spanel-norm">
+      <div class="norm-mode">
+        <button class="norm-btn active" id="nm-0" onclick="setNormMode(0)">Z → P</button>
+        <button class="norm-btn"        id="nm-1" onclick="setNormMode(1)">X, μ, σ → Z</button>
+        <button class="norm-btn"        id="nm-2" onclick="setNormMode(2)">P → Z (inversa)</button>
+      </div>
+
+      <div id="norm-panel-0">
+        <div class="field"><label>Puntuación Z</label>
+          <input type="number" id="np0-z" placeholder="1.96" step="0.01" oninput="calcNorm0()"></div>
+        <div class="result-card" id="np0-out" style="display:none">
+          <div class="stat-grid2">
+            <div class="stat-item"><div class="sl">P(X ≤ z) — área izquierda</div><div class="sv lg" id="np0-left" style="color:var(--green)"></div>
+              <div class="prob-bar"><div class="prob-fill" id="np0-bar-l"></div></div></div>
+            <div class="stat-item"><div class="sl">P(X ≥ z) — área derecha</div><div class="sv" id="np0-right" style="color:var(--accent2)"></div></div>
+            <div class="stat-item"><div class="sl">P(−|z| ≤ X ≤ |z|) — central</div><div class="sv" id="np0-mid"></div></div>
+            <div class="stat-item"><div class="sl">P(X ≤ −|z| o X ≥ |z|) — colas</div><div class="sv" id="np0-tails" style="color:var(--red)"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="norm-panel-1" style="display:none">
+        <div class="field-row3">
+          <div class="field"><label>Valor X</label>
+            <input type="number" id="np1-x" placeholder="85" oninput="calcNorm1()"></div>
+          <div class="field"><label>Media (μ)</label>
+            <input type="number" id="np1-mu" placeholder="70" oninput="calcNorm1()"></div>
+          <div class="field"><label>Desv. est. (σ)</label>
+            <input type="number" id="np1-sig" placeholder="10" oninput="calcNorm1()"></div>
+        </div>
+        <div class="result-card" id="np1-out" style="display:none">
+          <div class="stat-grid2">
+            <div class="stat-item"><div class="sl">Z-score</div><div class="sv lg" id="np1-z" style="color:var(--yellow)"></div></div>
+            <div class="stat-item"><div class="sl">P(X ≤ x)</div><div class="sv lg" id="np1-left" style="color:var(--green)"></div></div>
+            <div class="stat-item"><div class="sl">P(X ≥ x)</div><div class="sv" id="np1-right" style="color:var(--accent2)"></div></div>
+            <div class="stat-item"><div class="sl">Percentil</div><div class="sv" id="np1-pct"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="norm-panel-2" style="display:none">
+        <div class="field"><label>Probabilidad acumulada p (0 a 1)</label>
+          <input type="number" id="np2-p" placeholder="0.975" step="0.001" min="0.001" max="0.999" oninput="calcNorm2()"></div>
+        <div class="field-row">
+          <div class="field"><label>Media (μ, opcional)</label>
+            <input type="number" id="np2-mu" placeholder="0" oninput="calcNorm2()"></div>
+          <div class="field"><label>Desv. est. (σ, opcional)</label>
+            <input type="number" id="np2-sig" placeholder="1" oninput="calcNorm2()"></div>
+        </div>
+        <div class="result-card" id="np2-out" style="display:none">
+          <div class="stat-grid2">
+            <div class="stat-item"><div class="sl">Z crítico</div><div class="sv lg" id="np2-z" style="color:var(--yellow)"></div></div>
+            <div class="stat-item"><div class="sl">X = μ + Z·σ</div><div class="sv lg" id="np2-x" style="color:var(--green)"></div></div>
+            <div class="stat-item"><div class="sl">Z bilateral (±)</div><div class="sv" id="np2-z2"></div></div>
+            <div class="stat-item"><div class="sl">Confianza bilateral</div><div class="sv" id="np2-conf"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Regresión lineal -->
+    <div class="fpanel" id="spanel-regr">
+      <div class="field-row">
+        <div class="field"><label>Valores X (uno por línea o coma)</label>
+          <textarea id="rg-x" placeholder="1&#10;2&#10;3&#10;4&#10;5" oninput="calcRegr()"></textarea></div>
+        <div class="field"><label>Valores Y (mismo orden)</label>
+          <textarea id="rg-y" placeholder="2.1&#10;3.9&#10;6.2&#10;7.8&#10;10.1" oninput="calcRegr()"></textarea></div>
+      </div>
+      <div id="rg-out" style="display:none">
+        <div class="result-card" style="margin-bottom:.5rem">
+          <div class="stat-grid2">
+            <div class="stat-item"><div class="sl">Ecuación</div><div class="sv" id="rg-eq" style="color:var(--accent2);font-size:.95rem"></div></div>
+            <div class="stat-item"><div class="sl">n pares</div><div class="sv" id="rg-n"></div></div>
+            <div class="stat-item"><div class="sl">Pendiente (m)</div><div class="sv" id="rg-m" style="color:var(--green)"></div></div>
+            <div class="stat-item"><div class="sl">Intercepto (b)</div><div class="sv" id="rg-b"></div></div>
+            <div class="stat-item"><div class="sl">Correlación (r)</div><div class="sv" id="rg-r" style="color:var(--yellow)"></div></div>
+            <div class="stat-item"><div class="sl">R² (bondad ajuste)</div><div class="sv" id="rg-r2"></div></div>
+            <div class="stat-item"><div class="sl">Error estándar</div><div class="sv" id="rg-se"></div></div>
+            <div class="stat-item"><div class="sl">Interpretación r</div><div class="sv" id="rg-interp" style="font-size:.78rem"></div></div>
+          </div>
+        </div>
+        <svg id="reg-svg" viewBox="0 0 360 200"></svg>
+        <div class="result-card" style="margin-top:.5rem">
+          <div class="field" style="margin-bottom:0">
+            <label>Predecir ŷ para X =</label>
+            <div style="display:flex;gap:8px;align-items:center;margin-top:3px">
+              <input type="number" id="rg-px" placeholder="6" oninput="calcPred()" style="flex:1">
+              <div id="rg-pred" style="font-size:1.15rem;font-weight:600;color:var(--green);white-space:nowrap;min-width:80px;text-align:right"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /panel-stat -->
+
 </div><!-- .shell -->
+
+<!-- Tooltip -->
+<div id="tip">
+  <div class="tip-t" id="tip-t"></div>
+  <div class="tip-d" id="tip-d"></div>
+  <span class="tip-e" id="tip-e"></span>
+</div>
+
 <script>
 // ─────────────────────────────────────────────────────────────────────────────
 // UTILS
@@ -948,7 +1190,7 @@ function hasVal(id){ const v=valRaw(id); return v !== '' && v !== null && !isNaN
 // ─────────────────────────────────────────────────────────────────────────────
 // MODE SWITCHING
 // ─────────────────────────────────────────────────────────────────────────────
-const MODES = ['basic','sci','fin','conv'];
+const MODES = ['basic','sci','fin','conv','stat'];
 let currentMode = 'basic';
 function switchMode(m) {
   MODES.forEach(id => {
@@ -958,6 +1200,85 @@ function switchMode(m) {
   currentMode = m;
   if (m==='conv') cvInit();
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TOOLTIP SYSTEM
+// ─────────────────────────────────────────────────────────────────────────────
+const TIPS = {
+  ac:     {t:'AC — Borrar todo',           d:'Reinicia completamente la calculadora a cero.',                             ex:'123 × 5 → AC → 0'},
+  sign:   {t:'+/− Cambiar signo',          d:'Invierte el signo del número actual.',                                      ex:'25 → +/− → −25'},
+  pct:    {t:'% Porcentaje',               d:'Divide entre 100. En operaciones calcula ese % del acumulador.',            ex:'200 × 15% = 30 (descuento del 15%)'},
+  mc:     {t:'MC — Memory Clear',          d:'Borra el valor almacenado en memoria (lo pone a 0).',                       ex:'Mem = 500 → MC → Mem = 0'},
+  mr:     {t:'MR — Memory Recall',         d:'Carga el valor de memoria en el display para usarlo en cálculos.',          ex:'Guardaste el IVA → MR para reutilizarlo'},
+  mplus:  {t:'M+ — Memory Add',            d:'Suma el número del display a la memoria.',                                  ex:'Mem=100, display=50 → M+ → Mem=150'},
+  mminus: {t:'M− — Memory Subtract',      d:'Resta el número del display de la memoria.',                                ex:'Mem=200, display=30 → M− → Mem=170'},
+  sin:    {t:'sin — Seno',                 d:'Cateto opuesto / hipotenusa. Resultado siempre entre −1 y 1.',              ex:'sin(30°) = 0.5 → El cateto menor es la mitad de la hipotenusa'},
+  cos:    {t:'cos — Coseno',               d:'Cateto adyacente / hipotenusa. Componente horizontal de un vector.',        ex:'cos(60°) = 0.5 → Fuerza horizontal de un vector a 60°'},
+  tan:    {t:'tan — Tangente',             d:'Seno/coseno. Mide la pendiente de un ángulo.',                              ex:'tan(45°) = 1 → Rampa a 45°: sube 1 m por cada m horizontal'},
+  asin:   {t:'sin⁻¹ — Arcoseno',          d:'Ángulo cuyo seno es x. Rango de salida: −90° a 90°.',                      ex:'asin(0.5) = 30° → Ángulo con altura/longitud = 0.5'},
+  acos:   {t:'cos⁻¹ — Arcocoseno',        d:'Ángulo cuyo coseno es x. Rango de salida: 0° a 180°.',                     ex:'acos(0.866) ≈ 30° → Ángulo entre dos vectores'},
+  atan:   {t:'tan⁻¹ — Arcotangente',      d:'Ángulo cuya tangente es x. Muy usado en física y gráficos 2D.',             ex:'atan(1) = 45° → Dirección del vector diagonal (1,1)'},
+  log:    {t:'log — Logaritmo base 10',    d:'Potencia a la que hay que elevar 10 para obtener x. Inversa de 10ˣ.',       ex:'log(1000) = 3 → Escala Richter, decibelios'},
+  ln:     {t:'ln — Logaritmo natural',     d:'Logaritmo base e ≈ 2.718. Modela crecimiento y decaimiento continuo.',     ex:'ln(7.389) ≈ 2 → Tiempo de triplicación con tasa continua'},
+  log2:   {t:'log₂ — Logaritmo base 2',   d:'Potencia a la que hay que elevar 2 para obtener x. Esencial en informática.',ex:'log₂(1024) = 10 → Bits para representar 1024 valores'},
+  pow2:   {t:'x² — Cuadrado',             d:'Multiplica el número por sí mismo. Aparece en áreas y física.',             ex:'15² = 225 → Área de un cuadrado de 15 m de lado'},
+  pow3:   {t:'x³ — Cubo',                 d:'x elevado a la tercera potencia. Aparece en volúmenes.',                    ex:'4³ = 64 → Volumen de un cubo de 4 cm de arista'},
+  sqrt:   {t:'√x — Raíz cuadrada',        d:'Número que multiplicado por sí mismo da x.',                                ex:'√225 = 15 → Lado de cuadrado con área 225 m²'},
+  cbrt:   {t:'∛x — Raíz cúbica',          d:'Número que elevado al cubo da x.',                                          ex:'∛125 = 5 → Arista de cubo con volumen 125 cm³'},
+  xpowy:  {t:'xʸ — Potencia arbitraria',  d:'Eleva x a la potencia y. Ingresa x → xʸ → y → =.',                        ex:'2 xʸ 10 = 1024 → Combinaciones de 10 bits'},
+  '10x':  {t:'10ˣ — Potencia de diez',    d:'Antilogaritmo base 10. Inversa de log.',                                    ex:'10^2.5 ≈ 316 → Si log(x)=2.5, entonces x≈316'},
+  ex:     {t:'eˣ — Exponencial natural',  d:'e ≈ 2.718 elevado a x. Inversa de ln. Modela crecimiento continuo.',        ex:'e^0.05 ≈ 1.051 → Capital con 5% de interés continuo anual'},
+  fact:   {t:'n! — Factorial',            d:'Producto 1×2×3×…×n. Base de la combinatoria. Crece muy rápido.',            ex:'6! = 720 → Maneras de ordenar 6 personas en una fila'},
+  pi:     {t:'π — Pi',                    d:'Razón circunferencia/diámetro de cualquier círculo ≈ 3.14159.',              ex:'Área círculo r=7: π×7² ≈ 153.94 m²'},
+  econ:   {t:'e — Número de Euler',       d:'Base del logaritmo natural ≈ 2.71828. Aparece en interés continuo.',         ex:'$1000 al 100% continuo 1 año = 1000·e ≈ $2718'},
+  inv:    {t:'1/x — Recíproco',           d:'Inverso multiplicativo: 1 dividido entre x.',                               ex:'1/0.25 = 4 → Si 1€ = 0.25 USD, entonces 1 USD = 4€'},
+  absx:   {t:'|x| — Valor absoluto',      d:'Magnitud sin signo. Siempre ≥ 0.',                                          ex:'|−18| = 18 → Diferencia entre −18°C y 0°C'},
+  mod:    {t:'mod — Módulo / Resto',      d:'Resto de la división entera. Útil para ciclos y verificar paridad.',         ex:'23 mod 7 = 2 → Día 23 en ciclo semanal cae en martes'},
+};
+
+const tipEl = $('tip');
+let tipTimer = null, touchTimer = null;
+
+function showTip(key, el) {
+  const tip = TIPS[key]; if (!tip) return;
+  $('tip-t').textContent = tip.t;
+  $('tip-d').textContent = tip.d;
+  $('tip-e').textContent = tip.ex;
+  tipEl.style.display = 'block';
+  // Position after layout
+  requestAnimationFrame(() => {
+    const r = el.getBoundingClientRect();
+    const tw = tipEl.offsetWidth, th = tipEl.offsetHeight;
+    let top = r.top - th - 10;
+    if (top < 8) top = r.bottom + 10;
+    let left = r.left + r.width / 2 - tw / 2;
+    left = Math.max(8, Math.min(left, window.innerWidth - tw - 8));
+    tipEl.style.top = top + 'px';
+    tipEl.style.left = left + 'px';
+    tipEl.classList.add('show');
+  });
+}
+function hideTip() {
+  clearTimeout(tipTimer); clearTimeout(touchTimer);
+  tipEl.classList.remove('show');
+  setTimeout(() => { if (!tipEl.classList.contains('show')) tipEl.style.display = 'none'; }, 160);
+}
+document.addEventListener('mouseover', e => {
+  const btn = e.target.closest('[data-tip]'); if (!btn) return;
+  clearTimeout(tipTimer);
+  tipTimer = setTimeout(() => showTip(btn.dataset.tip, btn), 420);
+});
+document.addEventListener('mouseout', e => {
+  const btn = e.target.closest('[data-tip]'); if (!btn) return;
+  if (!btn.contains(e.relatedTarget)) { clearTimeout(tipTimer); hideTip(); }
+});
+document.addEventListener('touchstart', e => {
+  const btn = e.target.closest('[data-tip]'); if (!btn) return;
+  touchTimer = setTimeout(() => showTip(btn.dataset.tip, btn), 600);
+}, {passive:true});
+document.addEventListener('touchend',  () => { clearTimeout(touchTimer); });
+document.addEventListener('touchmove', () => { clearTimeout(touchTimer); hideTip(); });
+document.addEventListener('click', () => { if (tipEl.classList.contains('show')) hideTip(); });
 
 // ─────────────────────────────────────────────────────────────────────────────
 // BASIC CALCULATOR
@@ -1645,6 +1966,231 @@ function cvReverse(){
 function cvSwap(){
   const f=$('cv-from'),t=$('cv-to'),fi=$('cv-in'),fo=$('cv-out');
   [f.value,t.value]=[t.value,f.value];[fi.value,fo.value]=[fo.value,fi.value];cvConvert();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// STATISTICS
+// ─────────────────────────────────────────────────────────────────────────────
+const STAT_TABS = ['desc','comb','norm','regr'];
+function switchStat(sub) {
+  STAT_TABS.forEach(id => {
+    $('stab-'+id)?.classList.toggle('active', id===sub);
+    $('spanel-'+id)?.classList.toggle('active', id===sub);
+  });
+}
+
+// ── Descriptive ──
+function parseData(s) { return s.split(/[\s,;]+/).map(Number).filter(n=>!isNaN(n)&&s.trim()!==''); }
+function stMean(d)    { return d.reduce((a,b)=>a+b,0)/d.length; }
+function stMedian(d)  { const s=[...d].sort((a,b)=>a-b),m=Math.floor(s.length/2); return s.length%2===0?(s[m-1]+s[m])/2:s[m]; }
+function stMode(d)    {
+  const c={}; d.forEach(x=>c[x]=(c[x]||0)+1);
+  const mx=Math.max(...Object.values(c));
+  const modes=Object.keys(c).filter(k=>c[k]===mx).map(Number).sort((a,b)=>a-b);
+  return {modes, count:mx, all: d.length===modes.length};
+}
+function stVar(d,sample=false) { const m=stMean(d),n=d.length; return d.reduce((s,x)=>s+(x-m)**2,0)/(sample?n-1:n); }
+function stQ(d,q) { const s=[...d].sort((a,b)=>a-b),pos=(s.length-1)*q,lo=Math.floor(pos),hi=Math.ceil(pos); return s[lo]+(s[hi]-s[lo])*(pos-lo); }
+
+function calcDesc() {
+  const data = parseData($('st-data').value||'');
+  if (data.length < 2) { hide('desc-out'); return; }
+  show('desc-out');
+  const n=data.length, sum=data.reduce((a,b)=>a+b,0);
+  const mean=stMean(data), median=stMedian(data);
+  const {modes,all:noMode}=stMode(data);
+  const sorted=[...data].sort((a,b)=>a-b);
+  const min=sorted[0],max=sorted[n-1];
+  const varp=stVar(data,false),vars=stVar(data,true);
+  const sp=Math.sqrt(varp),ss=Math.sqrt(vars);
+  const q1=stQ(data,0.25),q3=stQ(data,0.75);
+  const skew=ss>0?3*(mean-median)/ss:0;
+  const cv=mean!==0?Math.abs(sp/mean*100):NaN;
+
+  $('ds-n').textContent=n;
+  $('ds-sum').textContent=fmtNum(sum);
+  $('ds-mean').textContent=fmtNum(mean,8);
+  $('ds-median').textContent=fmtNum(median,8);
+  $('ds-mode').textContent=noMode?'N/A':modes.map(m=>fmtNum(m,6)).join(', ');
+  $('ds-range').textContent=fmtNum(max-min,8);
+  $('ds-min').textContent=fmtNum(min,8);
+  $('ds-max').textContent=fmtNum(max,8);
+  $('ds-cv').textContent=isFinite(cv)?fmtNum(cv,4)+'%':'—';
+  $('ds-sigmap').textContent=fmtNum(sp,8);
+  $('ds-sigmas').textContent=n>1?fmtNum(ss,8):'—';
+  $('ds-varp').textContent=fmtNum(varp,8);
+  $('ds-vars').textContent=n>1?fmtNum(vars,8):'—';
+  $('ds-q1').textContent=fmtNum(q1,8);
+  $('ds-q3').textContent=fmtNum(q3,8);
+  $('ds-iqr').textContent=fmtNum(q3-q1,8);
+  $('ds-skew').textContent=fmtNum(skew,4)+(skew>0.5?' (pos.→)':skew<-0.5?' (neg.←)':' (sim.)');
+  $('ds-sorted').textContent=sorted.map(x=>fmtNum(x,8)).join('  ·  ');
+}
+
+// ── Combinatorics ──
+function logGamma(x) {
+  if(x<0.5) return Math.log(Math.PI/Math.sin(Math.PI*x))-logGamma(1-x);
+  x-=1; const c=[0.99999999999980993,676.5203681218851,-1259.1392167224028,771.32342877765313,
+    -176.61502916214059,12.507343278686905,-0.13857109526572012,9.9843695780195716e-6,1.5056327351493116e-7];
+  let ag=c[0]; for(let i=1;i<=8;i++) ag+=c[i]/(x+i);
+  const t=x+7.5;
+  return 0.5*Math.log(2*Math.PI)+(x+0.5)*Math.log(t)-t+Math.log(ag);
+}
+function logFact(n) { return n<=1?0:logGamma(n+1); }
+function fmtBig(n)  { if(!isFinite(n)) return '∞'; if(n>1e15) return n.toExponential(4); return n%1===0?n.toLocaleString('es-CL'):fmtNum(n,8); }
+function nCr(n,r)   { if(r<0||r>n) return 0; return Math.round(Math.exp(logFact(n)-logFact(r)-logFact(n-r))); }
+function nPr(n,r)   { if(r<0||r>n) return 0; return Math.round(Math.exp(logFact(n)-logFact(n-r))); }
+
+function calcComb() {
+  const n=parseInt($('cb-n').value), r=parseInt($('cb-r').value);
+  if(isNaN(n)||isNaN(r)||n<0||r<0){ hide('cb-out'); return; }
+  show('cb-out');
+  $('cb-ncr').textContent=fmtBig(nCr(n,r));
+  $('cb-npr').textContent=fmtBig(nPr(n,r));
+  $('cb-nfact').textContent=n<=170?fmtBig(Math.round(Math.exp(logFact(n)))):'∞';
+  $('cb-rfact').textContent=r<=170?fmtBig(Math.round(Math.exp(logFact(r)))):'∞';
+  $('cb-nrfact').textContent=(n-r)>=0&&(n-r)<=170?fmtBig(Math.round(Math.exp(logFact(n-r)))):'∞';
+}
+
+function binomP(n,k,p) { return Math.exp(logFact(n)-logFact(k)-logFact(n-k)+k*Math.log(p)+(n-k)*Math.log(1-p)); }
+function calcBinom() {
+  const n=parseInt($('bn-n').value), k=parseInt($('bn-k').value), p=parseFloat($('bn-p').value);
+  if(isNaN(n)||isNaN(k)||isNaN(p)||p<0||p>1||k>n||k<0){ hide('bn-out'); return; }
+  show('bn-out');
+  const exact=binomP(n,k,p);
+  let cum=0; for(let j=0;j<=k;j++) cum+=binomP(n,j,p);
+  cum=Math.min(cum,1);
+  $('bn-exact').textContent=fmtPct(exact*100,4);
+  $('bn-cum').textContent=fmtPct(cum*100,4);
+  $('bn-upper').textContent=fmtPct((1-cum+exact)*100,4);
+  $('bn-mean').textContent=fmtNum(n*p,6);
+  $('bn-std').textContent=fmtNum(Math.sqrt(n*p*(1-p)),6);
+}
+
+// ── Normal distribution ──
+let normMode = 0;
+function setNormMode(m) {
+  normMode=m; [0,1,2].forEach(i=>{ $('nm-'+i).classList.toggle('active',i===m); $('norm-panel-'+i).style.display=i===m?'':'none'; });
+}
+function normCDF(z) {
+  const t=1/(1+0.2316419*Math.abs(z)), d=0.3989423*Math.exp(-z*z/2);
+  const p=d*t*(0.3193815+t*(-0.3565638+t*(1.7814779+t*(-1.8212560+t*1.3302744))));
+  return z>0?1-p:p;
+}
+function normINV(p) {
+  if(p<=0||p>=1) return NaN;
+  const a=[-3.969683028665376e1,2.209460984245205e2,-2.759285104469687e2,1.383577518672690e2,-3.066479806614716e1,2.506628277459239],
+        b=[-5.447609879822406e1,1.615858368580409e2,-1.556989798598866e2,6.680131188771972e1,-1.328068155288572e1],
+        c=[-7.784894002430293e-3,-3.223964580411365e-1,-2.400758277161838,-2.549732539343734,4.374664141464968,2.938163982698783],
+        d=[7.784695709041462e-3,3.224671290700398e-1,2.445134137142996,3.754408661907416];
+  const pl=0.02425,ph=1-pl; let q,r;
+  if(p<pl){q=Math.sqrt(-2*Math.log(p));return(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);}
+  else if(p<=ph){q=p-0.5;r=q*q;return(((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q/(((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1);}
+  else{q=Math.sqrt(-2*Math.log(1-p));return-(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);}
+}
+function fmtP(v) { return fmtMoney(v*100,4)+'%'; }
+
+function calcNorm0() {
+  const z=parseFloat($('np0-z').value); if(isNaN(z)){ hide('np0-out'); return; }
+  const left=normCDF(z), right=1-left, absz=Math.abs(z);
+  const mid=normCDF(absz)-normCDF(-absz), tails=1-mid;
+  show('np0-out');
+  $('np0-left').textContent=fmtP(left);
+  $('np0-right').textContent=fmtP(right);
+  $('np0-mid').textContent=fmtP(mid);
+  $('np0-tails').textContent=fmtP(tails);
+  $('np0-bar-l').style.width=(left*100).toFixed(2)+'%';
+}
+function calcNorm1() {
+  const x=parseFloat($('np1-x').value),mu=parseFloat($('np1-mu').value)||0,sig=parseFloat($('np1-sig').value)||1;
+  if(isNaN(x)){ hide('np1-out'); return; }
+  const z=(x-mu)/sig, left=normCDF(z);
+  show('np1-out');
+  $('np1-z').textContent=fmtNum(z,6);
+  $('np1-left').textContent=fmtP(left);
+  $('np1-right').textContent=fmtP(1-left);
+  $('np1-pct').textContent='Percentil '+fmtMoney(left*100,2);
+}
+function calcNorm2() {
+  const p=parseFloat($('np2-p').value),mu=parseFloat($('np2-mu').value)||0,sig=parseFloat($('np2-sig').value)||1;
+  if(isNaN(p)||p<=0||p>=1){ hide('np2-out'); return; }
+  const z=normINV(p), x=mu+z*sig;
+  const z2=normINV(1-(1-p)/2);
+  show('np2-out');
+  $('np2-z').textContent=fmtNum(z,6);
+  $('np2-x').textContent=fmtNum(x,6);
+  $('np2-z2').textContent='±'+fmtNum(Math.abs(z2),6);
+  $('np2-conf').textContent=fmtP(2*p-1>0?2*p-1:p);
+}
+
+// ── Linear Regression ──
+function parseVec(s) { return s.split(/[\s,;\n]+/).map(Number).filter(n=>!isNaN(n)&&s.trim()!==''); }
+function calcRegr() {
+  const xs=parseVec($('rg-x').value||''), ys=parseVec($('rg-y').value||'');
+  if(xs.length<2||xs.length!==ys.length){ hide('rg-out'); return; }
+  const n=xs.length;
+  const sx=xs.reduce((a,b)=>a+b,0), sy=ys.reduce((a,b)=>a+b,0);
+  const sxy=xs.reduce((s,x,i)=>s+x*ys[i],0);
+  const sx2=xs.reduce((s,x)=>s+x*x,0), sy2=ys.reduce((s,y)=>s+y*y,0);
+  const denom=n*sx2-sx*sx;
+  if(Math.abs(denom)<1e-12){ hide('rg-out'); return; }
+  const m=(n*sxy-sx*sy)/denom, b=(sy-m*sx)/n;
+  const r=(n*sxy-sx*sy)/Math.sqrt(denom*(n*sy2-sy*sy));
+  const r2=r*r;
+  const sse=ys.reduce((s,y,i)=>s+(y-(m*xs[i]+b))**2,0);
+  const se=Math.sqrt(sse/(n-2));
+  const absR=Math.abs(r);
+  const interp=absR>=0.9?'Muy fuerte':absR>=0.7?'Fuerte':absR>=0.5?'Moderada':absR>=0.3?'Débil':'Muy débil/nula';
+
+  show('rg-out');
+  $('rg-n').textContent=n+' pares';
+  $('rg-m').textContent=fmtNum(m,8);
+  $('rg-b').textContent=fmtNum(b,8);
+  $('rg-eq').textContent=`ŷ = ${fmtNum(m,5)}x + ${fmtNum(b,5)}`;
+  $('rg-r').textContent=fmtNum(r,6);
+  $('rg-r2').textContent=fmtNum(r2,6)+' ('+fmtMoney(r2*100,1)+'%)';
+  $('rg-se').textContent=fmtNum(se,6);
+  $('rg-interp').textContent=interp+(r>=0?' positiva':' negativa');
+  drawScatter(xs,ys,m,b);
+  calcPred(m,b);
+}
+function calcPred(m,b) {
+  if(m===undefined){ /* called from input */ return; }
+  const px=parseFloat($('rg-px').value);
+  $('rg-pred').textContent=isNaN(px)?'':('ŷ = '+fmtNum(m*px+b,6));
+}
+$('rg-px') && $('rg-px').addEventListener('input',()=>{
+  const m=parseFloat($('rg-m').textContent), b=parseFloat($('rg-b').textContent);
+  const px=parseFloat($('rg-px').value);
+  $('rg-pred').textContent=isNaN(px)||isNaN(m)?'':('ŷ = '+fmtNum(m*px+b,6));
+});
+
+function drawScatter(xs,ys,m,b) {
+  const W=360,H=195,pad=28;
+  const minX=Math.min(...xs),maxX=Math.max(...xs);
+  const allY=[...ys,m*minX+b,m*maxX+b];
+  const minY=Math.min(...allY),maxY=Math.max(...allY);
+  const xR=maxX-minX||1, yR=maxY-minY||1;
+  const px=x=>pad+(x-minX)/xR*(W-2*pad);
+  const py=y=>H-pad-(y-minY)/yR*(H-2*pad);
+  let svg=`<svg viewBox="0 0 ${W} ${H}" style="background:var(--surface);border-radius:10px;border:1px solid var(--border)">`;
+  // Axes
+  svg+=`<line x1="${pad}" y1="${pad}" x2="${pad}" y2="${H-pad}" stroke="var(--border)" stroke-width="1"/>`;
+  svg+=`<line x1="${pad}" y1="${H-pad}" x2="${W-pad}" y2="${H-pad}" stroke="var(--border)" stroke-width="1"/>`;
+  // Axis labels
+  svg+=`<text x="${pad}" y="${H-pad+14}" font-size="9" fill="var(--text2)" text-anchor="middle">${fmtNum(minX,4)}</text>`;
+  svg+=`<text x="${W-pad}" y="${H-pad+14}" font-size="9" fill="var(--text2)" text-anchor="middle">${fmtNum(maxX,4)}</text>`;
+  svg+=`<text x="${pad-4}" y="${H-pad}" font-size="9" fill="var(--text2)" text-anchor="end">${fmtNum(minY,4)}</text>`;
+  svg+=`<text x="${pad-4}" y="${pad+4}" font-size="9" fill="var(--text2)" text-anchor="end">${fmtNum(maxY,4)}</text>`;
+  // Regression line
+  svg+=`<line x1="${px(minX)}" y1="${py(m*minX+b)}" x2="${px(maxX)}" y2="${py(m*maxX+b)}" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="4 2"/>`;
+  // Points
+  xs.forEach((x,i)=>{ svg+=`<circle cx="${px(x)}" cy="${py(ys[i])}" r="3.5" fill="var(--accent2)" opacity="0.85"/>`; });
+  svg+='</svg>';
+  $('reg-svg').outerHTML=svg;  // replace entire element to avoid ID loss
+  // Re-attach listener
+  const newSvg=document.querySelector('#rg-out svg');
+  if(newSvg) newSvg.id='reg-svg';
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
