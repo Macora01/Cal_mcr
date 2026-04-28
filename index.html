@@ -495,27 +495,27 @@
       <div class="tvm-row">
         <span class="tvm-key">N</span>
         <input type="number" id="tvm-n" placeholder="Períodos totales">
-        <button class="tvm-cpt" onclick="tvmSolve('N')">CPT N</button>
+        <button class="tvm-cpt" onclick="tvmSolve('N')" data-tip="tvmn">CPT N</button>
       </div>
       <div class="tvm-row">
         <span class="tvm-key">I/Y</span>
         <input type="number" id="tvm-iy" placeholder="Tasa anual %">
-        <button class="tvm-cpt" onclick="tvmSolve('IY')">CPT I/Y</button>
+        <button class="tvm-cpt" onclick="tvmSolve('IY')" data-tip="tvmiy">CPT I/Y</button>
       </div>
       <div class="tvm-row">
         <span class="tvm-key">PV</span>
         <input type="number" id="tvm-pv" placeholder="Valor actual">
-        <button class="tvm-cpt" onclick="tvmSolve('PV')">CPT PV</button>
+        <button class="tvm-cpt" onclick="tvmSolve('PV')" data-tip="tvmpv">CPT PV</button>
       </div>
       <div class="tvm-row">
         <span class="tvm-key">PMT</span>
         <input type="number" id="tvm-pmt" placeholder="Pago periódico">
-        <button class="tvm-cpt" onclick="tvmSolve('PMT')">CPT PMT</button>
+        <button class="tvm-cpt" onclick="tvmSolve('PMT')" data-tip="tvmpmt">CPT PMT</button>
       </div>
       <div class="tvm-row">
         <span class="tvm-key">FV</span>
         <input type="number" id="tvm-fv" placeholder="Valor futuro">
-        <button class="tvm-cpt" onclick="tvmSolve('FV')">CPT FV</button>
+        <button class="tvm-cpt" onclick="tvmSolve('FV')" data-tip="tvmfv">CPT FV</button>
       </div>
 
       <div class="tvm-result-display" id="tvm-result">
@@ -555,27 +555,27 @@
 
       <div class="result-card" id="lo-result" style="display:none">
         <div class="result-grid">
-          <div class="result-item">
+          <div class="result-item" data-tip="fnloancuota">
             <div class="rlabel">Cuota base</div>
             <div class="rvalue big" id="lo-pmt" style="color:var(--accent2)"></div>
           </div>
-          <div class="result-item">
+          <div class="result-item" data-tip="fnloancuota">
             <div class="rlabel">Cuota total</div>
             <div class="rvalue big" id="lo-pmt-total" style="color:var(--accent2)"></div>
           </div>
-          <div class="result-item">
+          <div class="result-item" data-tip="fnloanint">
             <div class="rlabel">Total intereses</div>
             <div class="rvalue" id="lo-interest" style="color:var(--red)"></div>
           </div>
-          <div class="result-item">
+          <div class="result-item" data-tip="fnloantotal">
             <div class="rlabel">Total a pagar</div>
             <div class="rvalue" id="lo-total"></div>
           </div>
-          <div class="result-item">
+          <div class="result-item" data-tip="fnloancost">
             <div class="rlabel">Coste del crédito</div>
             <div class="rvalue" id="lo-cost-pct"></div>
           </div>
-          <div class="result-item">
+          <div class="result-item" data-tip="fnloanextra">
             <div class="rlabel">Períodos con extra</div>
             <div class="rvalue" id="lo-periods-saved" style="color:var(--green)"></div>
           </div>
@@ -677,19 +677,19 @@
 
       <div class="result-card" id="npv-result" style="display:none;margin-top:.65rem">
         <div class="result-grid">
-          <div class="result-item">
+          <div class="result-item" data-tip="fnnpv">
             <div class="rlabel">VPN (NPV)</div>
             <div class="rvalue big" id="npv-val" style="color:var(--green)"></div>
           </div>
-          <div class="result-item">
+          <div class="result-item" data-tip="fntir">
             <div class="rlabel">TIR (IRR)</div>
             <div class="rvalue big" id="npv-irr" style="color:var(--accent2)"></div>
           </div>
-          <div class="result-item">
+          <div class="result-item" data-tip="fnpi">
             <div class="rlabel">Índice rentabilidad</div>
             <div class="rvalue" id="npv-pi"></div>
           </div>
-          <div class="result-item">
+          <div class="result-item" data-tip="fnpbk">
             <div class="rlabel">Período de recupero</div>
             <div class="rvalue" id="npv-payback"></div>
           </div>
@@ -771,19 +771,19 @@
       </div>
       <div class="result-card" id="rt-result1" style="display:none">
         <div class="result-grid">
-          <div class="result-item">
+          <div class="result-item" data-tip="fntea">
             <div class="rlabel">Tasa efectiva anual (TEA)</div>
             <div class="rvalue" id="rt-tea" style="color:var(--green)"></div>
           </div>
-          <div class="result-item">
+          <div class="result-item" data-tip="fnperiodic">
             <div class="rlabel">Tasa periódica</div>
             <div class="rvalue" id="rt-periodic"></div>
           </div>
-          <div class="result-item">
+          <div class="result-item" data-tip="fndaily">
             <div class="rlabel">Tasa diaria efectiva</div>
             <div class="rvalue" id="rt-daily"></div>
           </div>
-          <div class="result-item">
+          <div class="result-item" data-tip="fnapy">
             <div class="rlabel">APY equivalente</div>
             <div class="rvalue" id="rt-apy"></div>
           </div>
@@ -828,9 +828,9 @@
       </div>
       <div class="result-card" id="mg-result" style="display:none">
         <div class="result-grid">
-          <div class="result-item"><div class="rlabel">Margen bruto</div><div class="rvalue" id="mg-margin" style="color:var(--green)"></div></div>
-          <div class="result-item"><div class="rlabel">Markup</div><div class="rvalue" id="mg-markup" style="color:var(--accent2)"></div></div>
-          <div class="result-item"><div class="rlabel">Ganancia bruta</div><div class="rvalue" id="mg-profit"></div></div>
+          <div class="result-item" data-tip="fnmargin"><div class="rlabel">Margen bruto</div><div class="rvalue" id="mg-margin" style="color:var(--green)"></div></div>
+          <div class="result-item" data-tip="fnmarkup"><div class="rlabel">Markup</div><div class="rvalue" id="mg-markup" style="color:var(--accent2)"></div></div>
+          <div class="result-item" data-tip="fnprofit"><div class="rlabel">Ganancia bruta</div><div class="rvalue" id="mg-profit"></div></div>
           <div class="result-item"><div class="rlabel">Precio desde margen 30%</div><div class="rvalue" id="mg-price30"></div></div>
         </div>
       </div>
@@ -847,10 +847,10 @@
       </div>
       <div class="result-card" id="be-result" style="display:none">
         <div class="result-grid">
-          <div class="result-item"><div class="rlabel">Unidades de equilibrio</div><div class="rvalue" id="be-units" style="color:var(--yellow)"></div></div>
-          <div class="result-item"><div class="rlabel">Ingresos de equilibrio</div><div class="rvalue" id="be-revenue"></div></div>
-          <div class="result-item"><div class="rlabel">Margen de contribución</div><div class="rvalue" id="be-contrib"></div></div>
-          <div class="result-item"><div class="rlabel">Razón MC</div><div class="rvalue" id="be-mc-ratio"></div></div>
+          <div class="result-item" data-tip="fnbeunits"><div class="rlabel">Unidades de equilibrio</div><div class="rvalue" id="be-units" style="color:var(--yellow)"></div></div>
+          <div class="result-item" data-tip="fnberev"><div class="rlabel">Ingresos de equilibrio</div><div class="rvalue" id="be-revenue"></div></div>
+          <div class="result-item" data-tip="fnbemc"><div class="rlabel">Margen de contribución</div><div class="rvalue" id="be-contrib"></div></div>
+          <div class="result-item" data-tip="fnbemcr"><div class="rlabel">Razón MC</div><div class="rvalue" id="be-mc-ratio"></div></div>
         </div>
       </div>
 
@@ -866,8 +866,8 @@
       </div>
       <div class="result-card" id="rc-result" style="display:none">
         <div class="result-grid">
-          <div class="result-item"><div class="rlabel">ROI total</div><div class="rvalue" id="rc-roi" style="color:var(--green)"></div></div>
-          <div class="result-item"><div class="rlabel">CAGR</div><div class="rvalue" id="rc-cagr" style="color:var(--accent2)"></div></div>
+          <div class="result-item" data-tip="fnroi"><div class="rlabel">ROI total</div><div class="rvalue" id="rc-roi" style="color:var(--green)"></div></div>
+          <div class="result-item" data-tip="fncagr"><div class="rlabel">CAGR</div><div class="rvalue" id="rc-cagr" style="color:var(--accent2)"></div></div>
           <div class="result-item"><div class="rlabel">Ganancia neta</div><div class="rvalue" id="rc-net"></div></div>
           <div class="result-item"><div class="rlabel">Multiplicador</div><div class="rvalue" id="rc-mult"></div></div>
         </div>
@@ -981,28 +981,28 @@
       <div id="desc-out" style="display:none">
         <div class="result-card" style="margin-bottom:.5rem">
           <div class="stat-grid3">
-            <div class="stat-item"><div class="sl">n (datos)</div><div class="sv lg" id="ds-n" style="color:var(--accent2)"></div></div>
-            <div class="stat-item"><div class="sl">Suma (Σ)</div><div class="sv" id="ds-sum"></div></div>
-            <div class="stat-item"><div class="sl">Media (x̄)</div><div class="sv" id="ds-mean" style="color:var(--green)"></div></div>
-            <div class="stat-item"><div class="sl">Mediana</div><div class="sv" id="ds-median"></div></div>
-            <div class="stat-item"><div class="sl">Moda</div><div class="sv" id="ds-mode"></div></div>
-            <div class="stat-item"><div class="sl">Rango</div><div class="sv" id="ds-range"></div></div>
-            <div class="stat-item"><div class="sl">Mínimo</div><div class="sv" id="ds-min"></div></div>
-            <div class="stat-item"><div class="sl">Máximo</div><div class="sv" id="ds-max"></div></div>
-            <div class="stat-item"><div class="sl">CV (%)</div><div class="sv" id="ds-cv"></div></div>
+            <div class="stat-item" data-tip="stn"><div class="sl">n (datos)</div><div class="sv lg" id="ds-n" style="color:var(--accent2)"></div></div>
+            <div class="stat-item" data-tip="stsum"><div class="sl">Suma (Σ)</div><div class="sv" id="ds-sum"></div></div>
+            <div class="stat-item" data-tip="stmean"><div class="sl">Media (x̄)</div><div class="sv" id="ds-mean" style="color:var(--green)"></div></div>
+            <div class="stat-item" data-tip="stmed"><div class="sl">Mediana</div><div class="sv" id="ds-median"></div></div>
+            <div class="stat-item" data-tip="stmode"><div class="sl">Moda</div><div class="sv" id="ds-mode"></div></div>
+            <div class="stat-item" data-tip="strang"><div class="sl">Rango</div><div class="sv" id="ds-range"></div></div>
+            <div class="stat-item" data-tip="stmin"><div class="sl">Mínimo</div><div class="sv" id="ds-min"></div></div>
+            <div class="stat-item" data-tip="stmax"><div class="sl">Máximo</div><div class="sv" id="ds-max"></div></div>
+            <div class="stat-item" data-tip="stcv"><div class="sl">CV (%)</div><div class="sv" id="ds-cv"></div></div>
           </div>
         </div>
         <div class="result-card" style="margin-bottom:.5rem">
           <div style="font-size:.62rem;color:var(--text2);margin-bottom:.4rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em">Dispersión</div>
           <div class="stat-grid2">
-            <div class="stat-item"><div class="sl">Desv. est. población (σ)</div><div class="sv" id="ds-sigmap" style="color:var(--accent2)"></div></div>
-            <div class="stat-item"><div class="sl">Desv. est. muestra (s)</div><div class="sv" id="ds-sigmas"></div></div>
-            <div class="stat-item"><div class="sl">Varianza población (σ²)</div><div class="sv" id="ds-varp"></div></div>
-            <div class="stat-item"><div class="sl">Varianza muestra (s²)</div><div class="sv" id="ds-vars"></div></div>
-            <div class="stat-item"><div class="sl">Q1 (percentil 25)</div><div class="sv" id="ds-q1"></div></div>
-            <div class="stat-item"><div class="sl">Q3 (percentil 75)</div><div class="sv" id="ds-q3"></div></div>
-            <div class="stat-item"><div class="sl">IQR (Q3 − Q1)</div><div class="sv" id="ds-iqr"></div></div>
-            <div class="stat-item"><div class="sl">Sesgo (asimetría)</div><div class="sv" id="ds-skew"></div></div>
+            <div class="stat-item" data-tip="stsgp"><div class="sl">Desv. est. población (σ)</div><div class="sv" id="ds-sigmap" style="color:var(--accent2)"></div></div>
+            <div class="stat-item" data-tip="stsgs"><div class="sl">Desv. est. muestra (s)</div><div class="sv" id="ds-sigmas"></div></div>
+            <div class="stat-item" data-tip="stvarp"><div class="sl">Varianza población (σ²)</div><div class="sv" id="ds-varp"></div></div>
+            <div class="stat-item" data-tip="stvars"><div class="sl">Varianza muestra (s²)</div><div class="sv" id="ds-vars"></div></div>
+            <div class="stat-item" data-tip="stq1"><div class="sl">Q1 (percentil 25)</div><div class="sv" id="ds-q1"></div></div>
+            <div class="stat-item" data-tip="stq3"><div class="sl">Q3 (percentil 75)</div><div class="sv" id="ds-q3"></div></div>
+            <div class="stat-item" data-tip="stiqr"><div class="sl">IQR (Q3 − Q1)</div><div class="sv" id="ds-iqr"></div></div>
+            <div class="stat-item" data-tip="stskew"><div class="sl">Sesgo (asimetría)</div><div class="sv" id="ds-skew"></div></div>
           </div>
         </div>
         <div class="result-card">
@@ -1023,9 +1023,9 @@
       </div>
       <div class="result-card" id="cb-out" style="display:none">
         <div class="stat-grid3">
-          <div class="stat-item"><div class="sl">nCr — Combinaciones</div><div class="sv lg" id="cb-ncr" style="color:var(--green)"></div></div>
-          <div class="stat-item"><div class="sl">nPr — Permutaciones</div><div class="sv lg" id="cb-npr" style="color:var(--accent2)"></div></div>
-          <div class="stat-item"><div class="sl">n! — Factorial</div><div class="sv" id="cb-nfact"></div></div>
+          <div class="stat-item" data-tip="stncr"><div class="sl">nCr — Combinaciones</div><div class="sv lg" id="cb-ncr" style="color:var(--green)"></div></div>
+          <div class="stat-item" data-tip="stnpr"><div class="sl">nPr — Permutaciones</div><div class="sv lg" id="cb-npr" style="color:var(--accent2)"></div></div>
+          <div class="stat-item" data-tip="stnfact"><div class="sl">n! — Factorial</div><div class="sv" id="cb-nfact"></div></div>
           <div class="stat-item"><div class="sl">r!</div><div class="sv" id="cb-rfact"></div></div>
           <div class="stat-item"><div class="sl">(n−r)!</div><div class="sv" id="cb-nrfact"></div></div>
         </div>
@@ -1042,11 +1042,11 @@
       </div>
       <div class="result-card" id="bn-out" style="display:none">
         <div class="stat-grid3">
-          <div class="stat-item"><div class="sl">P(X = k)</div><div class="sv lg" id="bn-exact" style="color:var(--green)"></div></div>
-          <div class="stat-item"><div class="sl">P(X ≤ k)</div><div class="sv" id="bn-cum" style="color:var(--accent2)"></div></div>
-          <div class="stat-item"><div class="sl">P(X ≥ k)</div><div class="sv" id="bn-upper"></div></div>
-          <div class="stat-item"><div class="sl">Media (μ = np)</div><div class="sv" id="bn-mean"></div></div>
-          <div class="stat-item"><div class="sl">Desv. est. (σ)</div><div class="sv" id="bn-std"></div></div>
+          <div class="stat-item" data-tip="stbex"><div class="sl">P(X = k)</div><div class="sv lg" id="bn-exact" style="color:var(--green)"></div></div>
+          <div class="stat-item" data-tip="stbcum"><div class="sl">P(X ≤ k)</div><div class="sv" id="bn-cum" style="color:var(--accent2)"></div></div>
+          <div class="stat-item" data-tip="stbupp"><div class="sl">P(X ≥ k)</div><div class="sv" id="bn-upper"></div></div>
+          <div class="stat-item" data-tip="stbmean"><div class="sl">Media (μ = np)</div><div class="sv" id="bn-mean"></div></div>
+          <div class="stat-item" data-tip="stbstd"><div class="sl">Desv. est. (σ)</div><div class="sv" id="bn-std"></div></div>
         </div>
       </div>
     </div>
@@ -1064,11 +1064,11 @@
           <input type="number" id="np0-z" placeholder="1.96" step="0.01" oninput="calcNorm0()"></div>
         <div class="result-card" id="np0-out" style="display:none">
           <div class="stat-grid2">
-            <div class="stat-item"><div class="sl">P(X ≤ z) — área izquierda</div><div class="sv lg" id="np0-left" style="color:var(--green)"></div>
+            <div class="stat-item" data-tip="stzleft"><div class="sl">P(X ≤ z) — área izquierda</div><div class="sv lg" id="np0-left" style="color:var(--green)"></div>
               <div class="prob-bar"><div class="prob-fill" id="np0-bar-l"></div></div></div>
-            <div class="stat-item"><div class="sl">P(X ≥ z) — área derecha</div><div class="sv" id="np0-right" style="color:var(--accent2)"></div></div>
-            <div class="stat-item"><div class="sl">P(−|z| ≤ X ≤ |z|) — central</div><div class="sv" id="np0-mid"></div></div>
-            <div class="stat-item"><div class="sl">P(X ≤ −|z| o X ≥ |z|) — colas</div><div class="sv" id="np0-tails" style="color:var(--red)"></div></div>
+            <div class="stat-item" data-tip="stzright"><div class="sl">P(X ≥ z) — área derecha</div><div class="sv" id="np0-right" style="color:var(--accent2)"></div></div>
+            <div class="stat-item" data-tip="stzcentral"><div class="sl">P(−|z| ≤ X ≤ |z|) — central</div><div class="sv" id="np0-mid"></div></div>
+            <div class="stat-item" data-tip="stztails"><div class="sl">P(X ≤ −|z| o X ≥ |z|) — colas</div><div class="sv" id="np0-tails" style="color:var(--red)"></div></div>
           </div>
         </div>
       </div>
@@ -1084,10 +1084,10 @@
         </div>
         <div class="result-card" id="np1-out" style="display:none">
           <div class="stat-grid2">
-            <div class="stat-item"><div class="sl">Z-score</div><div class="sv lg" id="np1-z" style="color:var(--yellow)"></div></div>
-            <div class="stat-item"><div class="sl">P(X ≤ x)</div><div class="sv lg" id="np1-left" style="color:var(--green)"></div></div>
-            <div class="stat-item"><div class="sl">P(X ≥ x)</div><div class="sv" id="np1-right" style="color:var(--accent2)"></div></div>
-            <div class="stat-item"><div class="sl">Percentil</div><div class="sv" id="np1-pct"></div></div>
+            <div class="stat-item" data-tip="stz"><div class="sl">Z-score</div><div class="sv lg" id="np1-z" style="color:var(--yellow)"></div></div>
+            <div class="stat-item" data-tip="stzleft"><div class="sl">P(X ≤ x)</div><div class="sv lg" id="np1-left" style="color:var(--green)"></div></div>
+            <div class="stat-item" data-tip="stzright"><div class="sl">P(X ≥ x)</div><div class="sv" id="np1-right" style="color:var(--accent2)"></div></div>
+            <div class="stat-item" data-tip="stzpct"><div class="sl">Percentil</div><div class="sv" id="np1-pct"></div></div>
           </div>
         </div>
       </div>
@@ -1103,10 +1103,10 @@
         </div>
         <div class="result-card" id="np2-out" style="display:none">
           <div class="stat-grid2">
-            <div class="stat-item"><div class="sl">Z crítico</div><div class="sv lg" id="np2-z" style="color:var(--yellow)"></div></div>
-            <div class="stat-item"><div class="sl">X = μ + Z·σ</div><div class="sv lg" id="np2-x" style="color:var(--green)"></div></div>
-            <div class="stat-item"><div class="sl">Z bilateral (±)</div><div class="sv" id="np2-z2"></div></div>
-            <div class="stat-item"><div class="sl">Confianza bilateral</div><div class="sv" id="np2-conf"></div></div>
+            <div class="stat-item" data-tip="stz"><div class="sl">Z crítico</div><div class="sv lg" id="np2-z" style="color:var(--yellow)"></div></div>
+            <div class="stat-item" data-tip="stinvx"><div class="sl">X = μ + Z·σ</div><div class="sv lg" id="np2-x" style="color:var(--green)"></div></div>
+            <div class="stat-item" data-tip="stzbil"><div class="sl">Z bilateral (±)</div><div class="sv" id="np2-z2"></div></div>
+            <div class="stat-item" data-tip="stconf"><div class="sl">Confianza bilateral</div><div class="sv" id="np2-conf"></div></div>
           </div>
         </div>
       </div>
@@ -1123,14 +1123,14 @@
       <div id="rg-out" style="display:none">
         <div class="result-card" style="margin-bottom:.5rem">
           <div class="stat-grid2">
-            <div class="stat-item"><div class="sl">Ecuación</div><div class="sv" id="rg-eq" style="color:var(--accent2);font-size:.95rem"></div></div>
-            <div class="stat-item"><div class="sl">n pares</div><div class="sv" id="rg-n"></div></div>
-            <div class="stat-item"><div class="sl">Pendiente (m)</div><div class="sv" id="rg-m" style="color:var(--green)"></div></div>
-            <div class="stat-item"><div class="sl">Intercepto (b)</div><div class="sv" id="rg-b"></div></div>
-            <div class="stat-item"><div class="sl">Correlación (r)</div><div class="sv" id="rg-r" style="color:var(--yellow)"></div></div>
-            <div class="stat-item"><div class="sl">R² (bondad ajuste)</div><div class="sv" id="rg-r2"></div></div>
-            <div class="stat-item"><div class="sl">Error estándar</div><div class="sv" id="rg-se"></div></div>
-            <div class="stat-item"><div class="sl">Interpretación r</div><div class="sv" id="rg-interp" style="font-size:.78rem"></div></div>
+            <div class="stat-item" data-tip="streq"><div class="sl">Ecuación</div><div class="sv" id="rg-eq" style="color:var(--accent2);font-size:.95rem"></div></div>
+            <div class="stat-item" data-tip="stregn"><div class="sl">n pares</div><div class="sv" id="rg-n"></div></div>
+            <div class="stat-item" data-tip="strslope"><div class="sl">Pendiente (m)</div><div class="sv" id="rg-m" style="color:var(--green)"></div></div>
+            <div class="stat-item" data-tip="stintercept"><div class="sl">Intercepto (b)</div><div class="sv" id="rg-b"></div></div>
+            <div class="stat-item" data-tip="stcorr"><div class="sl">Correlación (r)</div><div class="sv" id="rg-r" style="color:var(--yellow)"></div></div>
+            <div class="stat-item" data-tip="str2"><div class="sl">R² (bondad ajuste)</div><div class="sv" id="rg-r2"></div></div>
+            <div class="stat-item" data-tip="stsee"><div class="sl">Error estándar</div><div class="sv" id="rg-se"></div></div>
+            <div class="stat-item" data-tip="stinterp"><div class="sl">Interpretación r</div><div class="sv" id="rg-interp" style="font-size:.78rem"></div></div>
           </div>
         </div>
         <svg id="reg-svg" viewBox="0 0 360 200"></svg>
@@ -1234,6 +1234,95 @@ const TIPS = {
   inv:    {t:'1/x — Recíproco',           d:'Inverso multiplicativo: 1 dividido entre x.',                               ex:'1/0.25 = 4 → Si 1€ = 0.25 USD, entonces 1 USD = 4€'},
   absx:   {t:'|x| — Valor absoluto',      d:'Magnitud sin signo. Siempre ≥ 0.',                                          ex:'|−18| = 18 → Diferencia entre −18°C y 0°C'},
   mod:    {t:'mod — Módulo / Resto',      d:'Resto de la división entera. Útil para ciclos y verificar paridad.',         ex:'23 mod 7 = 2 → Día 23 en ciclo semanal cae en martes'},
+
+  // ── Estadística: descriptiva ──
+  stn:    {t:'n — Número de datos',                 d:'Cantidad total de valores ingresados en el conjunto de datos. Base de todos los demás cálculos estadísticos.',                        ex:'n=15 datos → se calculan la media, mediana, moda y dispersión de esos 15 valores'},
+  stsum:  {t:'Σ — Suma total',                      d:'Suma aritmética de todos los valores del conjunto. La media es Σ / n.',                                                               ex:'Σ=450 con n=10 → media = 45'},
+  stmean: {t:'x̄ — Media aritmética',               d:'Promedio de todos los valores: suma dividida entre n. Sensible a valores extremos (outliers).',                                      ex:'Notas [60,70,80,90,100] → media = 80; un 20 la bajaría mucho'},
+  stmed:  {t:'Mediana',                             d:'Valor central al ordenar los datos. Divide la distribución en dos mitades iguales. Más robusta que la media ante outliers.',         ex:'Sueldos [1k,1.2k,1.5k,10k] → mediana=1.35k, mucho más representativa que la media'},
+  stmode: {t:'Moda',                                d:'Valor que aparece con mayor frecuencia. Puede haber varias modas (bimodal/multimodal) o ninguna si todos son distintos.',            ex:'Tallas más vendidas: si T42 aparece 15 veces, la moda es T42 → dato clave para stock'},
+  strang: {t:'Rango',                               d:'Diferencia entre el máximo y el mínimo. Mide la amplitud total del conjunto, muy sensible a valores extremos.',                      ex:'Temperaturas [12,15,22,30,35] → rango=23°C; si hay un outlier 0°C → rango=35°C'},
+  stmin:  {t:'Mínimo',                              d:'El valor más pequeño del conjunto de datos. Junto con el máximo define los límites del rango.',                                       ex:'Min=18 en edades → el participante más joven tiene 18 años'},
+  stmax:  {t:'Máximo',                              d:'El valor más grande del conjunto de datos. Identificar el máximo ayuda a detectar posibles valores atípicos.',                       ex:'Max=250 en tiempos de respuesta → hay al menos un caso extremadamente lento'},
+  stcv:   {t:'CV — Coeficiente de Variación (%)',   d:'Desviación estándar / media × 100. Mide la dispersión relativa, permitiendo comparar la variabilidad entre conjuntos con distintas escalas.', ex:'CV=15% vs CV=40% → el primer conjunto es mucho más homogéneo que el segundo'},
+
+  // ── Estadística: dispersión ──
+  stsgp:  {t:'σ — Desviación estándar poblacional', d:'Mide la dispersión promedio de todos los datos respecto a la media. Usa el total de datos (N) como divisor.',                        ex:'Temperaturas [20,22,21,19,23]: σ≈1.41 → dispersión típica de 1.41°C'},
+  stsgs:  {t:'s — Desviación estándar muestral',    d:'Como σ pero divide entre n−1 (corrección de Bessel) para estimar mejor la dispersión de la población a partir de una muestra.',     ex:'Muestra de 5 estudiantes: s=8.3 puntos → estimación de variabilidad de toda la clase'},
+  stvarp: {t:'σ² — Varianza poblacional',           d:'Promedio de las distancias al cuadrado respecto a la media. Es σ². Penaliza más los valores extremos.',                              ex:'σ²=2 → Si hubiera una raíz cuadrada: σ=1.41 unidades de dispersión'},
+  stvars: {t:'s² — Varianza muestral',              d:'Varianza calculada con divisor n−1. Base para inferencia estadística y pruebas de hipótesis.',                                        ex:'s²=68.9 → varianza de las notas de una muestra de 10 alumnos'},
+  stq1:   {t:'Q1 — Primer cuartil (percentil 25)',  d:'El 25% de los datos cae por debajo de este valor. Marca el límite inferior del "50% central" de los datos.',                         ex:'Q1=45 en salarios → el 25% gana menos de $45 000'},
+  stq3:   {t:'Q3 — Tercer cuartil (percentil 75)',  d:'El 75% de los datos cae por debajo de este valor. Marca el límite superior del "50% central".',                                      ex:'Q3=72 en salarios → el 75% gana menos de $72 000'},
+  stiqr:  {t:'IQR — Rango intercuartil',            d:'Diferencia Q3 − Q1. Mide la dispersión del 50% central, muy resistente a valores atípicos (outliers).',                              ex:'IQR=27 → la mitad central de los salarios varía en $27 000'},
+  stskew: {t:'Sesgo — Asimetría de Fisher',         d:'Mide si la distribución está inclinada. Positivo = cola larga a la derecha; negativo = cola larga a la izquierda; ≈0 = simétrica.', ex:'Sesgo=1.2 → distribución de ingresos con cola hacia arriba (pocos muy ricos)'},
+
+  // ── Estadística: combinatoria ──
+  stncr:  {t:'nCr — Combinaciones sin orden',       d:'Número de formas de elegir r elementos de n sin importar el orden. Fórmula: n! / (r! × (n−r)!).',                                    ex:'C(10,3)=120 → comités de 3 personas elegidos de 10'},
+  stnpr:  {t:'nPr — Permutaciones con orden',       d:'Número de formas de elegir r elementos de n donde el orden importa. Fórmula: n! / (n−r)!.',                                         ex:'P(10,3)=720 → podios 1°/2°/3° de 10 competidores'},
+  stnfact:{t:'n! — Factorial',                      d:'Producto de todos los enteros positivos hasta n. Crece explosivamente. Representa todas las formas de ordenar n objetos.',            ex:'5!=120 → 120 formas distintas de ordenar 5 libros en una estantería'},
+  stbex:  {t:'P(X = k) — Probabilidad exacta',      d:'Probabilidad de obtener exactamente k éxitos en n ensayos binomiales independientes con probabilidad p cada uno.',                    ex:'P(X=3) con n=10, p=0.3 → prob de 3 caras en 10 lanzamientos de moneda sesgada'},
+  stbcum: {t:'P(X ≤ k) — Probabilidad acumulada',  d:'Probabilidad de obtener k éxitos o menos. Es la suma de P(X=0)+P(X=1)+…+P(X=k).',                                                    ex:'P(X≤3)=0.65 → 65% de chance de 0, 1, 2 o 3 defectos en un lote'},
+  stbupp: {t:'P(X ≥ k) — Probabilidad superior',   d:'Probabilidad de obtener al menos k éxitos. Es 1 − P(X ≤ k−1). Usada en control de calidad y tests de hipótesis.',                   ex:'P(X≥5)=0.15 → 15% de probabilidad de 5 o más fallas'},
+  stbmean:{t:'μ = n·p — Media de la binomial',      d:'Valor esperado: cuántos éxitos se esperan en promedio en n ensayos con probabilidad p.',                                              ex:'n=20, p=0.3 → μ=6 éxitos esperados en promedio'},
+  stbstd: {t:'σ = √(n·p·q) — Desv. est. binomial', d:'Dispersión típica alrededor de la media en una distribución binomial. q = 1−p.',                                                     ex:'n=20, p=0.3 → σ≈2.05 → resultados suelen alejarse ±2 del promedio'},
+
+  // ── Estadística: distribución normal ──
+  stzleft:{t:'P(X ≤ z) — Área izquierda',          d:'Probabilidad acumulada a la izquierda de z. Es el percentil expresado como proporción (0 a 1).',                                      ex:'z=1.96 → P(X≤1.96)=0.975 → el 97.5% de los datos cae a la izquierda'},
+  stzright:{t:'P(X ≥ z) — Área derecha',           d:'Probabilidad en la cola derecha = 1 − P(X ≤ z). Usada en pruebas de hipótesis unilaterales.',                                        ex:'z=1.645 → P(X≥1.645)=0.05 → valor crítico al 5% (cola derecha)'},
+  stzcentral:{t:'P(−|z| ≤ X ≤ |z|) — Zona central',d:'Probabilidad en la zona simétrica alrededor de cero. Usada para calcular intervalos de confianza bilaterales.',                       ex:'z=1.96 → zona central = 0.95 → intervalo de confianza al 95%'},
+  stztails:{t:'P(colas) — Ambas colas',             d:'Probabilidad fuera del intervalo simétrico. Es el nivel de significancia α para pruebas bilaterales.',                                ex:'z=1.96 → colas = 0.05 = α → prueba bilateral al 95% de confianza'},
+  stz:    {t:'Z-score — Puntuación estándar',       d:'Número de desviaciones estándar que un valor X dista de la media μ. Fórmula: Z = (X − μ) / σ.',                                     ex:'Nota=85, μ=70, σ=10 → Z=1.5 → el alumno está 1.5σ sobre el promedio'},
+  stzpct: {t:'Percentil',                           d:'Porcentaje de la población que queda por debajo del valor X. Es P(X ≤ x) × 100.',                                                    ex:'Percentil 84 → el 84% de los individuos tiene un valor menor que X'},
+  stinvx: {t:'X = μ + Z·σ — Valor real inverso',   d:'Transforma un Z-score de vuelta a la escala original. Útil para encontrar el valor que corresponde a un percentil dado.',             ex:'Z=1.645, μ=100, σ=15 → X=124.7 → valor que supera al 95% de la distribución'},
+  stzbil: {t:'Z bilateral (±) — Valor crítico',     d:'El Z tal que P(−Z ≤ X ≤ Z) = p. Se usa en pares: ±Z delimitan el intervalo de confianza bilateral.',                                  ex:'p=0.95 → Z=±1.96 → los límites del intervalo de confianza al 95%'},
+  stconf: {t:'Confianza bilateral',                 d:'Probabilidad de que el intervalo [μ−Z·σ, μ+Z·σ] contenga el verdadero valor. Expresado como porcentaje.',                             ex:'p=0.975 → confianza bilateral = 95% → intervalos de confianza estándar en estadística'},
+
+  // ── Estadística: regresión ──
+  streq:  {t:'Ecuación de regresión — ŷ = m·x + b', d:'Recta que mejor ajusta los datos minimizando la suma de errores cuadráticos (mínimos cuadrados ordinarios).',                        ex:'ŷ = 2.1x + 0.3 → por cada unidad que sube X, Y sube ~2.1 unidades'},
+  stregn: {t:'n pares — Tamaño de la muestra',      d:'Número de pares (x, y) usados para calcular la regresión. Mínimo 2 para obtener una recta.',                                         ex:'n=30 pares → la regresión usa 30 observaciones; más datos = más confiable'},
+  strslope:{t:'Pendiente m — Tasa de cambio',       d:'Cambio en Y por cada unidad adicional de X. Si m > 0 la relación es positiva; si m < 0 es negativa.',                                ex:'m=1.82 → ventas suben $1820 por cada $1000 adicional en publicidad'},
+  stintercept:{t:'Intercepto b — Valor en X=0',    d:'Valor predicho de Y cuando X = 0. En muchos contextos solo es un parámetro del modelo, no tiene interpretación directa.',              ex:'b=3.2 → producción base de 3.2 unidades cuando no se invierte en insumos'},
+  stcorr: {t:'r — Coeficiente de correlación de Pearson', d:'Mide fuerza y dirección de la relación lineal. Va de −1 (relación inversa perfecta) a +1 (directa perfecta). 0 = sin relación lineal.', ex:'r=0.95 → correlación muy fuerte positiva; el modelo explica bien la variación de Y'},
+  str2:   {t:'R² — Coeficiente de determinación',  d:'Proporción de la varianza de Y explicada por X. R²=1 → ajuste perfecto; R²=0 → X no explica nada de Y.',                              ex:'R²=0.90 → el 90% de la variación en ventas se explica por el gasto publicitario'},
+  stsee:  {t:'Error estándar de la estimación',     d:'Desviación típica de los residuos (diferencias entre valores reales y predichos). Mide la precisión del modelo.',                     ex:'SEE=1.3 → las predicciones del modelo se desvían ~1.3 unidades del valor real'},
+  stinterp:{t:'Interpretación del coeficiente r',   d:'Clasificación verbal: |r|≥0.9 muy fuerte, 0.7–0.9 fuerte, 0.5–0.7 moderado, 0.3–0.5 débil, <0.3 muy débil.',                        ex:'r=0.82 → "correlación fuerte positiva" entre las variables'},
+
+  // ── TVM ──
+  tvmn:   {t:'N — Número de períodos',              d:'Total de períodos del cálculo financiero (pagos, cuotas o años según P/Y). CPT N calcula cuántos períodos necesitas.',               ex:'Préstamo a 5 años mensual → N=60 períodos. ¿Cuántas cuotas para pagar $100k?'},
+  tvmiy:  {t:'I/Y — Tasa de interés anual',         d:'Tasa nominal anual. Se divide entre P/Y internamente para obtener la tasa periódica. CPT I/Y halla la tasa implícita.',              ex:'Hipoteca al 6% anual mensual → I/Y=6. ¿Qué tasa equivale a pagar $800/mes?'},
+  tvmpv:  {t:'PV — Valor presente',                 d:'Valor hoy de la inversión o préstamo. Egresos = negativo, ingresos = positivo. CPT PV calcula cuánto vale hoy un flujo futuro.',     ex:'Préstamo recibido = +PV; capital invertido = −PV. ¿Cuánto solicitar para pagar $500/mes?'},
+  tvmpmt: {t:'PMT — Pago periódico',                d:'Cuota fija recurrente: cuota de préstamo, aporte a ahorro, renta, etc. CPT PMT calcula el pago necesario.',                          ex:'PMT=−800 en préstamo → pagas $800/mes. ¿Qué cuota necesitas para acumular $50k?'},
+  tvmfv:  {t:'FV — Valor futuro',                   d:'Valor al final del plazo: capital acumulado, saldo pendiente o monto a recibir. CPT FV proyecta el resultado final.',                 ex:'FV=50 000 → meta de ahorro a alcanzar. ¿Cuánto tendrás en 10 años con $200/mes?'},
+
+  // ── Financiera: préstamo ──
+  fnloancuota:{t:'Cuota — Pago periódico del préstamo', d:'Monto fijo que pagas cada período para amortizar el capital e intereses. Se calcula con la fórmula de anualidad PMT.',           ex:'$100k al 6% en 60 meses → cuota ≈ $1 933/mes'},
+  fnloanint:  {t:'Total intereses pagados',          d:'Suma de todos los intereses a lo largo del préstamo. Cuanto mayor el plazo o la tasa, mayor este costo.',                            ex:'$100k al 6%, 60 meses → total intereses ≈ $15 993 (16% del capital)'},
+  fnloantotal:{t:'Total a pagar',                    d:'Capital prestado + todos los intereses. Es lo que realmente cuesta el préstamo.',                                                    ex:'$100k prestado → total a pagar ≈ $115 993 en 5 años al 6%'},
+  fnloancost: {t:'Coste del crédito (%)',            d:'Total intereses como % del capital original. Permite comparar préstamos de distintos montos.',                                       ex:'16% → cada $100 prestados cuestan $16 de interés en el total del plazo'},
+  fnloanextra:{t:'Períodos con pago extra',          d:'Cuántos períodos se ahorran si añades un pago adicional cada cuota. Reduce el plazo y el total de intereses.',                       ex:'+$200/mes en cuota de $500 → ahorras 18 meses y varios miles en intereses'},
+
+  // ── Financiera: VPN / TIR ──
+  fnnpv:  {t:'VPN — Valor Presente Neto',           d:'Suma de todos los flujos de caja descontados al presente. VPN>0 → el proyecto crea valor; VPN<0 → destruye valor.',                 ex:'VPN=$8 350 al 10% → el proyecto vale $8 350 más de lo mínimo exigido'},
+  fntir:  {t:'TIR — Tasa Interna de Retorno',       d:'Tasa de descuento que hace VPN=0. Si TIR > tasa de corte, el proyecto es viable. No sirve si hay flujos no convencionales.',        ex:'TIR=18% con corte 10% → el proyecto rinde 8 puntos por encima del mínimo'},
+  fnpi:   {t:'Índice de Rentabilidad (IR)',          d:'IR = (VPN + inversión) / inversión. IR>1 → viable; IR=1.5 → por cada $1 invertido se recuperan $1.50 en valor presente.',           ex:'IR=1.25 → eficiente si hay capital limitado para comparar proyectos alternativos'},
+  fnpbk:  {t:'Período de Recupero (Payback)',        d:'Tiempo para recuperar la inversión inicial con los flujos de caja acumulados. Ignora el valor del dinero en el tiempo.',             ex:'Payback=2.8 años → recuperas la inversión antes del tercer año del proyecto'},
+
+  // ── Financiera: tasas ──
+  fntea:  {t:'TEA — Tasa Efectiva Anual',           d:'Rentabilidad o costo real en un año, considerando la capitalización de los intereses. Permite comparar distintos productos.',        ex:'TNA 12% mensual → TEA=12.68% → el capital crece un 12.68% en un año completo'},
+  fnperiodic:{t:'Tasa periódica',                   d:'Porción de la tasa anual que aplica en cada período de capitalización. Se obtiene dividiendo la TNA entre la frecuencia.',           ex:'TNA 12%, capitalización mensual → tasa periódica = 1% mensual'},
+  fndaily:{t:'Tasa diaria efectiva',                d:'Tasa equivalente por día, útil para calcular intereses en plazos cortos o comparar con préstamos diarios.',                          ex:'TEA 12% → tasa diaria ≈ 0.031% → $1 000 gana ~$0.31 por día'},
+  fnapy:  {t:'APY — Annual Percentage Yield',       d:'Término anglosajón equivalente a la TEA. Es el rendimiento anual real incluyendo la capitalización compuesta.',                      ex:'APY 5.12% vs TNA 5% capitalizado mensualmente → son lo mismo expresado distinto'},
+
+  // ── Financiera: márgenes y rentabilidad ──
+  fnmargin:{t:'Margen bruto (%)',                   d:'Proporción del precio de venta que representa la ganancia. Margen = (precio−costo)/precio × 100.',                                    ex:'Costo $60, precio $100 → margen 40% → por cada $100 vendido, $40 es ganancia'},
+  fnmarkup:{t:'Markup — Margen sobre costo (%)',    d:'Cuánto se sube al costo para llegar al precio. Markup = (precio−costo)/costo × 100. Siempre > margen si ambos son positivos.',       ex:'Costo $60, precio $100 → markup 66.7% → se sube 66.7% sobre el costo'},
+  fnprofit:{t:'Ganancia bruta',                     d:'Diferencia absoluta entre precio y costo. Es el monto monetario ganado antes de gastos operativos.',                                  ex:'Precio $100 − Costo $60 = $40 de ganancia bruta por unidad vendida'},
+  fnbeunits:{t:'Unidades de equilibrio (Break-even)',d:'Cuántas unidades debes vender para cubrir exactamente todos los costos fijos. Por debajo → pérdida; por encima → ganancia.',        ex:'1 000 unidades de equilibrio → la unidad 1001 empieza a generar utilidad real'},
+  fnberev:  {t:'Ingresos de equilibrio',            d:'Ventas totales en dinero necesarias para cubrir costos fijos. Equivale a: unidades equilibrio × precio unitario.',                   ex:'Breakeven $50 000 → necesitas facturar al menos $50k para no perder dinero'},
+  fnbemc:   {t:'Margen de contribución unitario',   d:'Precio − Costo variable por unidad. Cada unidad vendida "contribuye" este monto a cubrir los costos fijos.',                         ex:'Precio $50, costo variable $30 → MC=$20 → 500 unid × $20 = $10 000 para cubrir fijos'},
+  fnbemcr:  {t:'Razón MC (CMgR)',                   d:'MC unitario / precio. Proporción de cada peso vendido que queda para cubrir fijos. Alta razón = estructura más escalable.',           ex:'Razón MC=40% → de cada $100 vendido, $40 cubre costos fijos y genera utilidad'},
+  fnroi:    {t:'ROI — Retorno sobre la Inversión',  d:'(Ganancia neta / inversión inicial) × 100. Mide el rendimiento total de una inversión sin ajustar por el tiempo.',                   ex:'ROI=80% → por cada $100 invertidos, obtuviste $80 de ganancia adicional'},
+  fncagr:   {t:'CAGR — Tasa de Crecimiento Anual Compuesto', d:'Tasa anual constante que llevaría la inversión del valor inicial al final en el mismo número de años. Suaviza la volatilidad anual.',  ex:'CAGR=12.5% en 5 años → la inversión creció como si siempre hubiera rendido 12.5%/año'},
 };
 
 const tipEl = $('tip');
