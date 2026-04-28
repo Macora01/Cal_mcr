@@ -1,0 +1,1684 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <meta name="theme-color" content="#0f0f11">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Calculadora — facore.cl</title>
+  <style>
+    :root {
+      --bg:      #0f0f11;
+      --surface: #18181d;
+      --card:    #21212a;
+      --border:  #2c2c38;
+      --accent:  #6366f1;
+      --accent2: #818cf8;
+      --red:     #f87171;
+      --green:   #34d399;
+      --yellow:  #fbbf24;
+      --text1:   #f0f0f4;
+      --text2:   #8888a0;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-tap-highlight-color: transparent; }
+    body {
+      background: var(--bg);
+      color: var(--text1);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1rem 0.75rem 2.5rem;
+    }
+
+    ::-webkit-scrollbar { width: 3px; height: 3px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    .shell { width: 100%; max-width: 420px; }
+
+    header { text-align: center; margin-bottom: 1.25rem; }
+    header h1 { font-size: 1.35rem; font-weight: 600; letter-spacing: -0.02em; }
+    header p  { font-size: 0.7rem; color: var(--text2); margin-top: 2px; letter-spacing: 0.06em; text-transform: uppercase; }
+
+    /* ── Tab bar ── */
+    .tabs {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 3px; background: var(--surface);
+      border: 1px solid var(--border); border-radius: 14px;
+      padding: 3px; margin-bottom: 1rem;
+    }
+    .tab {
+      border: none; background: transparent; color: var(--text2);
+      font-size: 0.72rem; font-weight: 500; padding: 7px 4px;
+      border-radius: 10px; cursor: pointer; transition: all 0.18s ease;
+    }
+    .tab.active { background: var(--accent); color: #fff; }
+    .tab:not(.active):hover { color: var(--text1); background: rgba(255,255,255,0.06); }
+
+    /* ── Panels ── */
+    .panel { display: none; }
+    .panel.active { display: block; animation: fadeUp 0.2s ease; }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Calculator display ── */
+    .display {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 16px; padding: 1rem 1.25rem; margin-bottom: 0.75rem;
+      min-height: 88px; display: flex; flex-direction: column;
+      justify-content: flex-end; align-items: flex-end; overflow: hidden;
+    }
+    .display-expr {
+      font-size: 0.78rem; color: var(--text2);
+      font-family: 'SF Mono','Fira Code',ui-monospace,monospace;
+      min-height: 1.2em; max-width: 100%;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .display-val {
+      font-size: 2.4rem; font-weight: 300;
+      font-family: 'SF Mono','Fira Code',ui-monospace,monospace;
+      letter-spacing: -0.03em; line-height: 1.15;
+      max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+
+    /* ── Buttons ── */
+    .btn {
+      border: 1px solid var(--border); border-radius: 12px;
+      background: var(--card); color: var(--text1);
+      font-size: 1rem; font-weight: 500; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      user-select: none; -webkit-user-select: none;
+      transition: background 0.12s, transform 0.08s;
+    }
+    .btn:active { transform: scale(0.93); }
+    .btn:hover  { background: #29293a; border-color: #3a3a50; }
+    .btn-op  { background: rgba(99,102,241,0.13); border-color: rgba(99,102,241,0.28); color: var(--accent2); }
+    .btn-op:hover { background: rgba(99,102,241,0.22); }
+    .btn-eq  { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .btn-eq:hover { background: #5254d4; }
+    .btn-fn  { background: rgba(255,255,255,0.04); border-color: var(--border); color: var(--text2); font-size: 0.8rem; }
+    .btn-fn:hover { background: rgba(255,255,255,0.09); color: var(--text1); }
+    .btn-clr { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.22); color: var(--red); }
+    .btn-clr:hover { background: rgba(239,68,68,0.18); }
+    .btn-grn { background: rgba(52,211,153,0.12); border-color: rgba(52,211,153,0.28); color: var(--green); font-size: 0.78rem; }
+    .btn-grn:hover { background: rgba(52,211,153,0.22); }
+
+    /* ── Basic/Sci grids ── */
+    .grid-basic { display: grid; gap: 8px; }
+    .grid-mem   { grid-template-columns: repeat(4,1fr); margin-bottom: 6px; }
+    .grid-main  { grid-template-columns: repeat(4,1fr); }
+    .grid-sci   { display: grid; grid-template-columns: repeat(5,1fr); gap: 6px; }
+    .h-btn  { height: 58px; }
+    .h-btn-sm { height: 38px; }
+    .h-sci  { height: 46px; }
+    .col-2  { grid-column: span 2; }
+
+    .angle-bar { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
+    .angle-btn {
+      border: 1px solid var(--border); border-radius: 8px;
+      background: transparent; color: var(--text2);
+      font-size: 0.72rem; font-weight: 600; padding: 4px 10px;
+      cursor: pointer; transition: all 0.15s;
+    }
+    .angle-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+    /* ── Financial sub-tabs ── */
+    .ftabs {
+      display: flex; gap: 5px; overflow-x: auto;
+      padding-bottom: 4px; margin-bottom: 0.85rem;
+      scrollbar-width: none;
+    }
+    .ftabs::-webkit-scrollbar { display: none; }
+    .ftab {
+      white-space: nowrap; border: 1px solid var(--border);
+      border-radius: 9px; background: var(--surface); color: var(--text2);
+      font-size: 0.68rem; font-weight: 500; padding: 5px 11px;
+      cursor: pointer; transition: all 0.15s; flex-shrink: 0;
+    }
+    .ftab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .fpanel { display: none; }
+    .fpanel.active { display: block; animation: fadeUp 0.18s ease; }
+
+    /* ── Form elements ── */
+    label { font-size: 0.7rem; color: var(--text2); display: block; margin-bottom: 3px; }
+    .field { margin-bottom: 0.6rem; }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.45rem; }
+    .field-row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.4rem; }
+
+    input[type="number"], input[type="text"], select {
+      width: 100%; background: var(--surface); border: 1px solid var(--border);
+      color: var(--text1); border-radius: 9px; padding: 0.5rem 0.75rem;
+      font-size: 0.88rem; outline: none; transition: border-color 0.18s;
+      -webkit-appearance: none; appearance: none;
+    }
+    input:focus, select:focus { border-color: var(--accent); }
+    select option { background: #1a1a22; }
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+    /* ── Result cards ── */
+    .result-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; padding: 0.85rem; margin-top: 0.55rem;
+    }
+    .result-grid  { display: grid; grid-template-columns: 1fr 1fr; gap: 0.65rem; }
+    .result-grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem; }
+    .result-item .rlabel { font-size: 0.65rem; color: var(--text2); margin-bottom: 2px; }
+    .result-item .rvalue { font-size: 1.15rem; font-weight: 600; }
+    .result-item .rvalue.big { font-size: 1.35rem; }
+
+    /* ── TVM ── */
+    .tvm-row {
+      display: grid; grid-template-columns: 52px 1fr 58px;
+      gap: 6px; align-items: center; margin-bottom: 5px;
+    }
+    .tvm-key {
+      font-size: 0.78rem; font-weight: 700; color: var(--accent2);
+      letter-spacing: 0.02em;
+    }
+    .tvm-cpt {
+      height: 36px; border: 1px solid rgba(99,102,241,0.35);
+      border-radius: 8px; background: rgba(99,102,241,0.1);
+      color: var(--accent2); font-size: 0.68rem; font-weight: 700;
+      cursor: pointer; transition: all 0.15s; letter-spacing: 0.04em;
+    }
+    .tvm-cpt:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .tvm-mode-bar { display: flex; gap: 5px; align-items: center; margin-bottom: 8px; flex-wrap: wrap; }
+    .tvm-mode-btn {
+      border: 1px solid var(--border); border-radius: 7px;
+      background: transparent; color: var(--text2);
+      font-size: 0.68rem; font-weight: 600; padding: 3px 9px;
+      cursor: pointer; transition: all 0.15s;
+    }
+    .tvm-mode-btn.active { background: var(--card); color: var(--text1); border-color: var(--accent2); }
+    .tvm-divider { flex: 1; height: 1px; background: var(--border); }
+    .tvm-result-display {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 10px; padding: 0.6rem 0.85rem; margin-top: 6px;
+      display: none;
+    }
+    .tvm-result-display.show { display: block; }
+    .tvm-result-label { font-size: 0.65rem; color: var(--text2); }
+    .tvm-result-val   { font-size: 1.5rem; font-weight: 600; color: var(--green); margin-top: 1px; }
+
+    /* ── Amortization / schedule tables ── */
+    .table-wrap {
+      margin-top: 0.55rem; border: 1px solid var(--border);
+      border-radius: 10px; overflow: hidden;
+    }
+    .table-wrap-scroll { max-height: 240px; overflow-y: auto; }
+    .fin-table { width: 100%; border-collapse: collapse; font-size: 0.72rem; }
+    .fin-table thead th {
+      background: var(--card); color: var(--text2); font-weight: 500;
+      padding: 5px 7px; text-align: right; white-space: nowrap;
+      position: sticky; top: 0; z-index: 1;
+    }
+    .fin-table thead th:first-child { text-align: left; }
+    .fin-table tbody td {
+      padding: 4px 7px; text-align: right;
+      border-top: 1px solid rgba(255,255,255,0.04);
+    }
+    .fin-table tbody td:first-child { text-align: left; color: var(--text2); }
+    .fin-table tbody tr:hover td { background: rgba(255,255,255,0.025); }
+    .fin-table tfoot td {
+      padding: 5px 7px; text-align: right; font-weight: 600;
+      border-top: 1px solid var(--border); background: var(--card);
+    }
+    .fin-table tfoot td:first-child { text-align: left; color: var(--text2); }
+
+    /* ── VPN/TIR cash flows ── */
+    .cf-header { display: grid; grid-template-columns: 36px 1fr 28px; gap: 5px; margin-bottom: 4px; }
+    .cf-row    { display: grid; grid-template-columns: 36px 1fr 28px; gap: 5px; align-items: center; margin-bottom: 4px; }
+    .cf-period { font-size: 0.68rem; color: var(--text2); text-align: center; padding-top: 6px; }
+    .cf-del {
+      height: 34px; border: 1px solid rgba(239,68,68,0.25);
+      border-radius: 7px; background: rgba(239,68,68,0.07);
+      color: var(--red); cursor: pointer; font-size: 0.9rem;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s;
+    }
+    .cf-del:hover { background: rgba(239,68,68,0.16); }
+    .cf-add-btn {
+      width: 100%; height: 34px; border: 1px dashed var(--border);
+      border-radius: 8px; background: transparent; color: var(--text2);
+      font-size: 0.75rem; cursor: pointer; margin-top: 2px;
+      transition: all 0.15s;
+    }
+    .cf-add-btn:hover { border-color: var(--accent2); color: var(--accent2); }
+
+    /* ── Converter ── */
+    .conv-swap { display: flex; justify-content: center; margin: 0.45rem 0; }
+    .swap-btn {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: var(--card); border: 1px solid var(--border);
+      color: var(--text2); font-size: 1.1rem; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s;
+    }
+    .swap-btn:hover { background: var(--surface); color: var(--text1); border-color: var(--accent2); }
+    .conv-pair { display: flex; gap: 7px; }
+    .conv-pair input  { flex: 1; }
+    .conv-pair select { flex: 1.1; }
+    .conv-formula { text-align: center; font-size: 0.7rem; color: var(--text2); padding: 5px 0; min-height: 1.5em; }
+    .ref-table {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 11px; padding: 0.7rem; margin-top: 0.45rem;
+      max-height: 195px; overflow-y: auto;
+    }
+    .ref-table-title { font-size: 0.65rem; color: var(--text2); margin-bottom: 0.35rem; }
+    .ref-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 3px 0; font-size: 0.8rem;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .ref-row:last-child { border-bottom: none; }
+    .ref-row .ref-unit { color: var(--text2); }
+
+    /* ── Tip presets ── */
+    .tip-presets { display: grid; grid-template-columns: repeat(5,1fr); gap: 5px; margin-bottom: 5px; }
+
+    /* ── Section divider ── */
+    .sec-divider {
+      font-size: 0.65rem; font-weight: 600; color: var(--text2);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin: 0.75rem 0 0.4rem; display: flex; align-items: center; gap: 8px;
+    }
+    .sec-divider::after { content:''; flex:1; height:1px; background:var(--border); }
+
+    /* ── Responsive ── */
+    @media (max-width: 360px) {
+      .h-btn { height: 52px; }
+      .h-sci { height: 42px; }
+      .btn-fn { font-size: 0.72rem; }
+      .display-val { font-size: 2rem; }
+    }
+    @media (min-width: 480px) {
+      body { padding-top: 2rem; }
+      .h-btn { height: 64px; }
+      .h-sci { height: 50px; }
+    }
+  </style>
+</head>
+<body>
+<div class="shell">
+
+  <header>
+    <h1>Calculadora</h1>
+    <p>cal.facore.cl</p>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchMode('basic')" id="tab-basic">Básica</button>
+    <button class="tab"        onclick="switchMode('sci')"   id="tab-sci">Científica</button>
+    <button class="tab"        onclick="switchMode('fin')"   id="tab-fin">Financiera</button>
+    <button class="tab"        onclick="switchMode('conv')"  id="tab-conv">Medidas</button>
+  </div>
+
+  <!-- ═══════════════════════ BÁSICA ═══════════════════════ -->
+  <div class="panel active" id="panel-basic">
+    <div class="display">
+      <div class="display-expr" id="b-expr"></div>
+      <div class="display-val"  id="b-val">0</div>
+    </div>
+    <div class="grid-basic grid-mem">
+      <button class="btn btn-fn h-btn-sm" onclick="memClear()">MC</button>
+      <button class="btn btn-fn h-btn-sm" onclick="memRecall()">MR</button>
+      <button class="btn btn-fn h-btn-sm" onclick="memAdd()">M+</button>
+      <button class="btn btn-fn h-btn-sm" onclick="memSub()">M−</button>
+    </div>
+    <div class="grid-basic grid-main">
+      <button class="btn btn-clr h-btn" onclick="bClear()">AC</button>
+      <button class="btn btn-fn  h-btn" onclick="bSign()">+/−</button>
+      <button class="btn btn-fn  h-btn" onclick="bPct()">%</button>
+      <button class="btn btn-op  h-btn" onclick="bOp('/')">÷</button>
+      <button class="btn h-btn" onclick="bDigit('7')">7</button>
+      <button class="btn h-btn" onclick="bDigit('8')">8</button>
+      <button class="btn h-btn" onclick="bDigit('9')">9</button>
+      <button class="btn btn-op h-btn" onclick="bOp('*')">×</button>
+      <button class="btn h-btn" onclick="bDigit('4')">4</button>
+      <button class="btn h-btn" onclick="bDigit('5')">5</button>
+      <button class="btn h-btn" onclick="bDigit('6')">6</button>
+      <button class="btn btn-op h-btn" onclick="bOp('-')">−</button>
+      <button class="btn h-btn" onclick="bDigit('1')">1</button>
+      <button class="btn h-btn" onclick="bDigit('2')">2</button>
+      <button class="btn h-btn" onclick="bDigit('3')">3</button>
+      <button class="btn btn-op h-btn" onclick="bOp('+')">+</button>
+      <button class="btn h-btn col-2" onclick="bDigit('0')">0</button>
+      <button class="btn h-btn" onclick="bDot()">.</button>
+      <button class="btn btn-eq h-btn" onclick="bCalc()">=</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════ CIENTÍFICA ═══════════════════════ -->
+  <div class="panel" id="panel-sci">
+    <div class="display">
+      <div class="display-expr" id="s-expr"></div>
+      <div class="display-val"  id="s-val">0</div>
+    </div>
+    <div class="angle-bar">
+      <button class="angle-btn active" id="ang-deg" onclick="setAngle('deg')">DEG</button>
+      <button class="angle-btn"        id="ang-rad" onclick="setAngle('rad')">RAD</button>
+      <div style="flex:1"></div>
+      <button class="btn btn-fn h-btn-sm" style="padding:0 14px;font-size:1rem" onclick="sBksp()">⌫</button>
+    </div>
+    <div class="grid-sci">
+      <button class="btn btn-fn h-sci" onclick="sFunc('sin')">sin</button>
+      <button class="btn btn-fn h-sci" onclick="sFunc('cos')">cos</button>
+      <button class="btn btn-fn h-sci" onclick="sFunc('tan')">tan</button>
+      <button class="btn btn-fn h-sci" onclick="sFunc('log')">log</button>
+      <button class="btn btn-fn h-sci" onclick="sFunc('ln')">ln</button>
+      <button class="btn btn-fn h-sci" style="font-size:.7rem" onclick="sFunc('asin')">sin⁻¹</button>
+      <button class="btn btn-fn h-sci" style="font-size:.7rem" onclick="sFunc('acos')">cos⁻¹</button>
+      <button class="btn btn-fn h-sci" style="font-size:.7rem" onclick="sFunc('atan')">tan⁻¹</button>
+      <button class="btn btn-fn h-sci" onclick="sFunc('pow2')">x²</button>
+      <button class="btn btn-fn h-sci" onclick="sFunc('pow3')">x³</button>
+      <button class="btn btn-fn h-sci" onclick="sFunc('sqrt')">√x</button>
+      <button class="btn btn-fn h-sci" onclick="sFunc('cbrt')">∛x</button>
+      <button class="btn btn-fn h-sci" onclick="sOp('**')">xʸ</button>
+      <button class="btn btn-fn h-sci" onclick="sFunc('10x')">10ˣ</button>
+      <button class="btn btn-fn h-sci" onclick="sFunc('ex')">eˣ</button>
+      <button class="btn btn-fn h-sci" onclick="sFunc('fact')">n!</button>
+      <button class="btn btn-fn h-sci" onclick="sFunc('pi')">π</button>
+      <button class="btn btn-fn h-sci" onclick="sFunc('eConst')">e</button>
+      <button class="btn btn-fn h-sci" onclick="sFunc('inv')">1/x</button>
+      <button class="btn btn-fn h-sci" onclick="sFunc('abs')">|x|</button>
+      <button class="btn btn-clr h-sci" onclick="sClear()">AC</button>
+      <button class="btn btn-fn  h-sci" onclick="sSign()">+/−</button>
+      <button class="btn btn-fn  h-sci" onclick="sPct()">%</button>
+      <button class="btn btn-fn  h-sci" onclick="sMod()">mod</button>
+      <button class="btn btn-op  h-sci" onclick="sOp('/')">÷</button>
+      <button class="btn h-sci" onclick="sDigit('7')">7</button>
+      <button class="btn h-sci" onclick="sDigit('8')">8</button>
+      <button class="btn h-sci" onclick="sDigit('9')">9</button>
+      <button class="btn btn-fn h-sci" onclick="sFunc('log2')">log₂</button>
+      <button class="btn btn-op h-sci" onclick="sOp('*')">×</button>
+      <button class="btn h-sci" onclick="sDigit('4')">4</button>
+      <button class="btn h-sci" onclick="sDigit('5')">5</button>
+      <button class="btn h-sci" onclick="sDigit('6')">6</button>
+      <button class="btn btn-fn h-sci" onclick="sFunc('recip')">1/x</button>
+      <button class="btn btn-op h-sci" onclick="sOp('-')">−</button>
+      <button class="btn h-sci" onclick="sDigit('1')">1</button>
+      <button class="btn h-sci" onclick="sDigit('2')">2</button>
+      <button class="btn h-sci" onclick="sDigit('3')">3</button>
+      <button class="btn btn-fn h-sci" onclick="sFunc('sqrt')">√</button>
+      <button class="btn btn-op h-sci" onclick="sOp('+')">+</button>
+      <button class="btn h-sci" style="grid-column:span 2" onclick="sDigit('0')">0</button>
+      <button class="btn h-sci" onclick="sDot()">.</button>
+      <button class="btn btn-eq h-sci" style="grid-column:span 2" onclick="sCalc()">=</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════ FINANCIERA ═══════════════════════ -->
+  <div class="panel" id="panel-fin">
+    <div class="ftabs">
+      <button class="ftab active" id="ftab-tvm"   onclick="switchFin('tvm')">TVM</button>
+      <button class="ftab" id="ftab-loan"          onclick="switchFin('loan')">Préstamo</button>
+      <button class="ftab" id="ftab-savings"       onclick="switchFin('savings')">Ahorro</button>
+      <button class="ftab" id="ftab-npv"           onclick="switchFin('npv')">VPN / TIR</button>
+      <button class="ftab" id="ftab-deprec"        onclick="switchFin('deprec')">Depreciación</button>
+      <button class="ftab" id="ftab-rates"         onclick="switchFin('rates')">Tasas</button>
+      <button class="ftab" id="ftab-margins"       onclick="switchFin('margins')">Rentabilidad</button>
+      <button class="ftab" id="ftab-daily"         onclick="switchFin('daily')">Cotidiano</button>
+    </div>
+
+    <!-- ── TVM ── -->
+    <div class="fpanel active" id="fpanel-tvm">
+      <div class="tvm-mode-bar">
+        <button class="tvm-mode-btn active" id="tvm-end" onclick="setTvmMode('end')">FIN PERÍODO</button>
+        <button class="tvm-mode-btn"        id="tvm-beg" onclick="setTvmMode('beg')">INICIO</button>
+        <div class="tvm-divider"></div>
+        <span style="font-size:.65rem;color:var(--text2)">P/Y</span>
+        <select id="tvm-py" style="width:auto;padding:3px 8px;font-size:.72rem;height:28px" onchange="tvmClear()">
+          <option value="1">1</option><option value="2">2</option>
+          <option value="4">4</option><option value="12" selected>12</option>
+          <option value="26">26</option><option value="52">52</option>
+          <option value="365">365</option>
+        </select>
+      </div>
+
+      <div class="tvm-row">
+        <span class="tvm-key">N</span>
+        <input type="number" id="tvm-n" placeholder="Períodos totales">
+        <button class="tvm-cpt" onclick="tvmSolve('N')">CPT N</button>
+      </div>
+      <div class="tvm-row">
+        <span class="tvm-key">I/Y</span>
+        <input type="number" id="tvm-iy" placeholder="Tasa anual %">
+        <button class="tvm-cpt" onclick="tvmSolve('IY')">CPT I/Y</button>
+      </div>
+      <div class="tvm-row">
+        <span class="tvm-key">PV</span>
+        <input type="number" id="tvm-pv" placeholder="Valor actual">
+        <button class="tvm-cpt" onclick="tvmSolve('PV')">CPT PV</button>
+      </div>
+      <div class="tvm-row">
+        <span class="tvm-key">PMT</span>
+        <input type="number" id="tvm-pmt" placeholder="Pago periódico">
+        <button class="tvm-cpt" onclick="tvmSolve('PMT')">CPT PMT</button>
+      </div>
+      <div class="tvm-row">
+        <span class="tvm-key">FV</span>
+        <input type="number" id="tvm-fv" placeholder="Valor futuro">
+        <button class="tvm-cpt" onclick="tvmSolve('FV')">CPT FV</button>
+      </div>
+
+      <div class="tvm-result-display" id="tvm-result">
+        <div class="tvm-result-label" id="tvm-result-label"></div>
+        <div class="tvm-result-val"   id="tvm-result-val"></div>
+        <div style="font-size:.62rem;color:var(--text2);margin-top:3px" id="tvm-result-note"></div>
+      </div>
+      <div style="font-size:.65rem;color:var(--text2);margin-top:8px;line-height:1.5">
+        Convención: <strong>ingresos = +</strong>, <strong>egresos = −</strong>. Deja en blanco el campo que deseas calcular y presiona CPT.
+      </div>
+    </div>
+
+    <!-- ── Préstamo / Amortización ── -->
+    <div class="fpanel" id="fpanel-loan">
+      <div class="field-row">
+        <div class="field"><label>Monto del préstamo</label>
+          <input type="number" id="lo-amount" placeholder="100 000" oninput="calcLoan()"></div>
+        <div class="field"><label>Tasa anual (%)</label>
+          <input type="number" id="lo-rate" placeholder="6.5" step="0.01" oninput="calcLoan()"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Plazo (meses)</label>
+          <input type="number" id="lo-months" placeholder="60" oninput="calcLoan()"></div>
+        <div class="field"><label>Frecuencia</label>
+          <select id="lo-freq" onchange="calcLoan()">
+            <option value="12">Mensual</option>
+            <option value="26">Quincenal</option>
+            <option value="52">Semanal</option>
+            <option value="4">Trimestral</option>
+            <option value="2">Semestral</option>
+            <option value="1">Anual</option>
+          </select>
+        </div>
+      </div>
+      <div class="field"><label>Pago extra por período (opcional)</label>
+        <input type="number" id="lo-extra" placeholder="0" oninput="calcLoan()"></div>
+
+      <div class="result-card" id="lo-result" style="display:none">
+        <div class="result-grid">
+          <div class="result-item">
+            <div class="rlabel">Cuota base</div>
+            <div class="rvalue big" id="lo-pmt" style="color:var(--accent2)"></div>
+          </div>
+          <div class="result-item">
+            <div class="rlabel">Cuota total</div>
+            <div class="rvalue big" id="lo-pmt-total" style="color:var(--accent2)"></div>
+          </div>
+          <div class="result-item">
+            <div class="rlabel">Total intereses</div>
+            <div class="rvalue" id="lo-interest" style="color:var(--red)"></div>
+          </div>
+          <div class="result-item">
+            <div class="rlabel">Total a pagar</div>
+            <div class="rvalue" id="lo-total"></div>
+          </div>
+          <div class="result-item">
+            <div class="rlabel">Coste del crédito</div>
+            <div class="rvalue" id="lo-cost-pct"></div>
+          </div>
+          <div class="result-item">
+            <div class="rlabel">Períodos con extra</div>
+            <div class="rvalue" id="lo-periods-saved" style="color:var(--green)"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="lo-table-wrap" class="table-wrap" style="display:none">
+        <div class="table-wrap-scroll">
+          <table class="fin-table">
+            <thead><tr>
+              <th>Per.</th><th>Bal. inicial</th><th>Cuota</th>
+              <th>Interés</th><th>Capital</th><th>Bal. final</th>
+            </tr></thead>
+            <tbody id="lo-tbody"></tbody>
+            <tfoot id="lo-tfoot"></tfoot>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Ahorro / Inversión ── -->
+    <div class="fpanel" id="fpanel-savings">
+      <div class="field-row">
+        <div class="field"><label>Capital inicial (PV)</label>
+          <input type="number" id="sv-pv" placeholder="0" oninput="calcSavings()"></div>
+        <div class="field"><label>Aporte periódico</label>
+          <input type="number" id="sv-pmt" placeholder="500" oninput="calcSavings()"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Tasa anual (%)</label>
+          <input type="number" id="sv-rate" placeholder="8" step="0.01" oninput="calcSavings()"></div>
+        <div class="field"><label>Años</label>
+          <input type="number" id="sv-years" placeholder="10" step="0.5" oninput="calcSavings()"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Frecuencia aportes</label>
+          <select id="sv-freq" onchange="calcSavings()">
+            <option value="12" selected>Mensual</option>
+            <option value="4">Trimestral</option>
+            <option value="2">Semestral</option>
+            <option value="1">Anual</option>
+          </select>
+        </div>
+        <div class="field"><label>Meta (FV objetivo, opcional)</label>
+          <input type="number" id="sv-goal" placeholder="100 000" oninput="calcSavings()"></div>
+      </div>
+
+      <div class="result-card" id="sv-result" style="display:none">
+        <div class="result-grid">
+          <div class="result-item">
+            <div class="rlabel">Valor futuro</div>
+            <div class="rvalue big" id="sv-fv" style="color:var(--green)"></div>
+          </div>
+          <div class="result-item">
+            <div class="rlabel">Intereses ganados</div>
+            <div class="rvalue" id="sv-int" style="color:var(--accent2)"></div>
+          </div>
+          <div class="result-item">
+            <div class="rlabel">Total aportado</div>
+            <div class="rvalue" id="sv-contributed"></div>
+          </div>
+          <div class="result-item">
+            <div class="rlabel">Rendimiento total</div>
+            <div class="rvalue" id="sv-ret"></div>
+          </div>
+        </div>
+        <div id="sv-goal-row" style="display:none;margin-top:.6rem;padding-top:.6rem;border-top:1px solid var(--border)">
+          <div class="result-grid">
+            <div class="result-item">
+              <div class="rlabel">Aporte necesario/período</div>
+              <div class="rvalue" id="sv-pmt-needed" style="color:var(--yellow)"></div>
+            </div>
+            <div class="result-item">
+              <div class="rlabel">Años para la meta</div>
+              <div class="rvalue" id="sv-years-needed" style="color:var(--yellow)"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── VPN / TIR ── -->
+    <div class="fpanel" id="fpanel-npv">
+      <div class="field-row">
+        <div class="field"><label>Tasa de descuento anual (%)</label>
+          <input type="number" id="npv-rate" placeholder="10" step="0.01" oninput="calcNPV()"></div>
+        <div class="field"><label>Inversión inicial (período 0)</label>
+          <input type="number" id="npv-cf0" placeholder="-50 000" oninput="calcNPV()"></div>
+      </div>
+
+      <div class="sec-divider">Flujos de caja (períodos 1 … n)</div>
+      <div class="cf-header">
+        <span style="font-size:.65rem;color:var(--text2);text-align:center">Per.</span>
+        <span style="font-size:.65rem;color:var(--text2)">Flujo de caja</span>
+        <span></span>
+      </div>
+      <div id="npv-flows"></div>
+      <button class="cf-add-btn" onclick="addCF()">+ Agregar período</button>
+
+      <div class="result-card" id="npv-result" style="display:none;margin-top:.65rem">
+        <div class="result-grid">
+          <div class="result-item">
+            <div class="rlabel">VPN (NPV)</div>
+            <div class="rvalue big" id="npv-val" style="color:var(--green)"></div>
+          </div>
+          <div class="result-item">
+            <div class="rlabel">TIR (IRR)</div>
+            <div class="rvalue big" id="npv-irr" style="color:var(--accent2)"></div>
+          </div>
+          <div class="result-item">
+            <div class="rlabel">Índice rentabilidad</div>
+            <div class="rvalue" id="npv-pi"></div>
+          </div>
+          <div class="result-item">
+            <div class="rlabel">Período de recupero</div>
+            <div class="rvalue" id="npv-payback"></div>
+          </div>
+          <div class="result-item">
+            <div class="rlabel">Flujo total neto</div>
+            <div class="rvalue" id="npv-net"></div>
+          </div>
+          <div class="result-item">
+            <div class="rlabel">Decisión</div>
+            <div class="rvalue" id="npv-decision" style="font-size:.9rem"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Depreciación ── -->
+    <div class="fpanel" id="fpanel-deprec">
+      <div class="field-row">
+        <div class="field"><label>Valor inicial del activo</label>
+          <input type="number" id="dep-cost" placeholder="50 000" oninput="calcDepreciation()"></div>
+        <div class="field"><label>Valor residual</label>
+          <input type="number" id="dep-salvage" placeholder="5 000" oninput="calcDepreciation()"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Vida útil (años)</label>
+          <input type="number" id="dep-life" placeholder="5" oninput="calcDepreciation()"></div>
+        <div class="field"><label>Método</label>
+          <select id="dep-method" onchange="calcDepreciation()">
+            <option value="sln">Línea recta (SLN)</option>
+            <option value="syd">Suma dígitos (SYD)</option>
+            <option value="ddb">Doble saldo decreciente (DDB)</option>
+            <option value="db">Saldo decreciente (DB)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="result-card" id="dep-summary" style="display:none">
+        <div class="result-grid">
+          <div class="result-item">
+            <div class="rlabel">Dep. año 1</div>
+            <div class="rvalue" id="dep-y1" style="color:var(--accent2)"></div>
+          </div>
+          <div class="result-item">
+            <div class="rlabel">Dep. total acumulada</div>
+            <div class="rvalue" id="dep-total"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="dep-table-wrap" class="table-wrap" style="display:none;margin-top:.5rem">
+        <div class="table-wrap-scroll">
+          <table class="fin-table">
+            <thead><tr>
+              <th>Año</th><th>Depreciación</th><th>Dep. acumulada</th><th>Valor libro</th>
+            </tr></thead>
+            <tbody id="dep-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Conversión de Tasas ── -->
+    <div class="fpanel" id="fpanel-rates">
+      <div class="sec-divider">Nominal ↔ Efectiva</div>
+      <div class="field-row">
+        <div class="field"><label>Tasa nominal anual (%)</label>
+          <input type="number" id="rt-nom" placeholder="12" step="0.01" oninput="calcRates()"></div>
+        <div class="field"><label>Capitalización</label>
+          <select id="rt-cap" onchange="calcRates()">
+            <option value="365">Diaria</option>
+            <option value="52">Semanal</option>
+            <option value="26">Quincenal</option>
+            <option value="12" selected>Mensual</option>
+            <option value="4">Trimestral</option>
+            <option value="2">Semestral</option>
+            <option value="1">Anual</option>
+          </select>
+        </div>
+      </div>
+      <div class="result-card" id="rt-result1" style="display:none">
+        <div class="result-grid">
+          <div class="result-item">
+            <div class="rlabel">Tasa efectiva anual (TEA)</div>
+            <div class="rvalue" id="rt-tea" style="color:var(--green)"></div>
+          </div>
+          <div class="result-item">
+            <div class="rlabel">Tasa periódica</div>
+            <div class="rvalue" id="rt-periodic"></div>
+          </div>
+          <div class="result-item">
+            <div class="rlabel">Tasa diaria efectiva</div>
+            <div class="rvalue" id="rt-daily"></div>
+          </div>
+          <div class="result-item">
+            <div class="rlabel">APY equivalente</div>
+            <div class="rvalue" id="rt-apy"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sec-divider">Convertir entre períodos</div>
+      <div class="field-row">
+        <div class="field"><label>Tasa conocida (%)</label>
+          <input type="number" id="rt-known" placeholder="1" step="0.001" oninput="calcRateConvert()"></div>
+        <div class="field"><label>Período de la tasa</label>
+          <select id="rt-known-period" onchange="calcRateConvert()">
+            <option value="1">Anual</option>
+            <option value="2">Semestral</option>
+            <option value="4">Trimestral</option>
+            <option value="12" selected>Mensual</option>
+            <option value="52">Semanal</option>
+            <option value="365">Diaria</option>
+          </select>
+        </div>
+      </div>
+      <div class="result-card" id="rt-result2" style="display:none">
+        <div class="result-grid">
+          <div class="result-item"><div class="rlabel">Anual</div><div class="rvalue" id="rt-c-annual"></div></div>
+          <div class="result-item"><div class="rlabel">Semestral</div><div class="rvalue" id="rt-c-semi"></div></div>
+          <div class="result-item"><div class="rlabel">Trimestral</div><div class="rvalue" id="rt-c-quarterly"></div></div>
+          <div class="result-item"><div class="rlabel">Mensual</div><div class="rvalue" id="rt-c-monthly"></div></div>
+          <div class="result-item"><div class="rlabel">Semanal</div><div class="rvalue" id="rt-c-weekly"></div></div>
+          <div class="result-item"><div class="rlabel">Diaria</div><div class="rvalue" id="rt-c-daily"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Rentabilidad & Márgenes ── -->
+    <div class="fpanel" id="fpanel-margins">
+      <div class="sec-divider">Margen & Markup</div>
+      <div class="field-row">
+        <div class="field"><label>Costo</label>
+          <input type="number" id="mg-cost" placeholder="100" oninput="calcMargins()"></div>
+        <div class="field"><label>Precio venta</label>
+          <input type="number" id="mg-price" placeholder="150" oninput="calcMargins()"></div>
+      </div>
+      <div class="result-card" id="mg-result" style="display:none">
+        <div class="result-grid">
+          <div class="result-item"><div class="rlabel">Margen bruto</div><div class="rvalue" id="mg-margin" style="color:var(--green)"></div></div>
+          <div class="result-item"><div class="rlabel">Markup</div><div class="rvalue" id="mg-markup" style="color:var(--accent2)"></div></div>
+          <div class="result-item"><div class="rlabel">Ganancia bruta</div><div class="rvalue" id="mg-profit"></div></div>
+          <div class="result-item"><div class="rlabel">Precio desde margen 30%</div><div class="rvalue" id="mg-price30"></div></div>
+        </div>
+      </div>
+
+      <div class="sec-divider">Punto de Equilibrio (Break-even)</div>
+      <div class="field-row">
+        <div class="field"><label>Costos fijos</label>
+          <input type="number" id="be-fixed" placeholder="10 000" oninput="calcBreakeven()"></div>
+        <div class="field"><label>Precio unitario venta</label>
+          <input type="number" id="be-price" placeholder="50" oninput="calcBreakeven()"></div>
+      </div>
+      <div class="field"><label>Costo variable por unidad</label>
+        <input type="number" id="be-varunit" placeholder="30" oninput="calcBreakeven()">
+      </div>
+      <div class="result-card" id="be-result" style="display:none">
+        <div class="result-grid">
+          <div class="result-item"><div class="rlabel">Unidades de equilibrio</div><div class="rvalue" id="be-units" style="color:var(--yellow)"></div></div>
+          <div class="result-item"><div class="rlabel">Ingresos de equilibrio</div><div class="rvalue" id="be-revenue"></div></div>
+          <div class="result-item"><div class="rlabel">Margen de contribución</div><div class="rvalue" id="be-contrib"></div></div>
+          <div class="result-item"><div class="rlabel">Razón MC</div><div class="rvalue" id="be-mc-ratio"></div></div>
+        </div>
+      </div>
+
+      <div class="sec-divider">ROI & CAGR</div>
+      <div class="field-row">
+        <div class="field"><label>Valor inicial</label>
+          <input type="number" id="rc-init" placeholder="10 000" oninput="calcROICAGR()"></div>
+        <div class="field"><label>Valor final</label>
+          <input type="number" id="rc-final" placeholder="18 000" oninput="calcROICAGR()"></div>
+      </div>
+      <div class="field"><label>Años transcurridos</label>
+        <input type="number" id="rc-years" placeholder="5" step="0.5" oninput="calcROICAGR()">
+      </div>
+      <div class="result-card" id="rc-result" style="display:none">
+        <div class="result-grid">
+          <div class="result-item"><div class="rlabel">ROI total</div><div class="rvalue" id="rc-roi" style="color:var(--green)"></div></div>
+          <div class="result-item"><div class="rlabel">CAGR</div><div class="rvalue" id="rc-cagr" style="color:var(--accent2)"></div></div>
+          <div class="result-item"><div class="rlabel">Ganancia neta</div><div class="rvalue" id="rc-net"></div></div>
+          <div class="result-item"><div class="rlabel">Multiplicador</div><div class="rvalue" id="rc-mult"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Cotidiano ── -->
+    <div class="fpanel" id="fpanel-daily">
+      <div class="sec-divider">Propina</div>
+      <div class="field-row">
+        <div class="field"><label>Total de la cuenta</label>
+          <input type="number" id="tp-bill" placeholder="50.00" step="0.01" oninput="calcTip()"></div>
+        <div class="field"><label>Personas</label>
+          <input type="number" id="tp-ppl" placeholder="1" value="1" min="1" oninput="calcTip()"></div>
+      </div>
+      <div class="tip-presets">
+        <button class="btn btn-fn h-btn-sm" onclick="setTip(10)">10%</button>
+        <button class="btn btn-fn h-btn-sm" onclick="setTip(15)">15%</button>
+        <button class="btn btn-fn h-btn-sm" onclick="setTip(18)">18%</button>
+        <button class="btn btn-fn h-btn-sm" onclick="setTip(20)">20%</button>
+        <button class="btn btn-fn h-btn-sm" onclick="setTip(25)">25%</button>
+      </div>
+      <div class="field"><label>Propina (%)</label>
+        <input type="number" id="tp-pct" placeholder="15" oninput="calcTip()"></div>
+      <div class="result-card" id="tp-result" style="display:none">
+        <div class="result-grid">
+          <div class="result-item"><div class="rlabel">Propina total</div><div class="rvalue" id="tp-tip" style="color:var(--accent2)"></div></div>
+          <div class="result-item"><div class="rlabel">Total con propina</div><div class="rvalue" id="tp-total" style="color:var(--green)"></div></div>
+          <div class="result-item"><div class="rlabel">Por persona</div><div class="rvalue" id="tp-pp"></div></div>
+          <div class="result-item"><div class="rlabel">Propina por persona</div><div class="rvalue" id="tp-tipp"></div></div>
+        </div>
+      </div>
+
+      <div class="sec-divider">Descuento / IVA</div>
+      <div class="field-row">
+        <div class="field"><label>Precio original</label>
+          <input type="number" id="dc-orig" placeholder="200" oninput="calcDiscount()"></div>
+        <div class="field"><label>Descuento o impuesto (%)</label>
+          <input type="number" id="dc-pct" placeholder="20" step="0.1" oninput="calcDiscount()"></div>
+      </div>
+      <div class="result-card" id="dc-result" style="display:none">
+        <div class="result-grid">
+          <div class="result-item"><div class="rlabel">Precio final (−descuento)</div><div class="rvalue" id="dc-final" style="color:var(--green)"></div></div>
+          <div class="result-item"><div class="rlabel">Ahorro / Impuesto</div><div class="rvalue" id="dc-save" style="color:var(--accent2)"></div></div>
+          <div class="result-item"><div class="rlabel">Precio con impuesto</div><div class="rvalue" id="dc-with-tax"></div></div>
+          <div class="result-item"><div class="rlabel">Precio sin impuesto (neto)</div><div class="rvalue" id="dc-net"></div></div>
+        </div>
+      </div>
+
+      <div class="sec-divider">Variación porcentual</div>
+      <div class="field-row">
+        <div class="field"><label>Valor anterior</label>
+          <input type="number" id="pv-before" placeholder="1000" oninput="calcPctChange()"></div>
+        <div class="field"><label>Valor nuevo</label>
+          <input type="number" id="pv-after" placeholder="1250" oninput="calcPctChange()"></div>
+      </div>
+      <div class="result-card" id="pv-result" style="display:none">
+        <div class="result-grid">
+          <div class="result-item"><div class="rlabel">Variación %</div><div class="rvalue" id="pv-pct"></div></div>
+          <div class="result-item"><div class="rlabel">Diferencia absoluta</div><div class="rvalue" id="pv-diff"></div></div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /panel-fin -->
+
+  <!-- ═══════════════════════ MEDIDAS ═══════════════════════ -->
+  <div class="panel" id="panel-conv">
+    <div class="field">
+      <label>Categoría</label>
+      <select id="cv-cat" onchange="cvInit()"></select>
+    </div>
+    <div class="field">
+      <label>De</label>
+      <div class="conv-pair">
+        <input type="number" id="cv-in" placeholder="0" oninput="cvConvert()">
+        <select id="cv-from" onchange="cvConvert()"></select>
+      </div>
+    </div>
+    <div class="conv-swap">
+      <button class="swap-btn" onclick="cvSwap()">⇅</button>
+    </div>
+    <div class="field">
+      <label>A</label>
+      <div class="conv-pair">
+        <input type="number" id="cv-out" placeholder="0" oninput="cvReverse()">
+        <select id="cv-to" onchange="cvConvert()"></select>
+      </div>
+    </div>
+    <div class="conv-formula" id="cv-formula"></div>
+    <div class="ref-table" id="cv-table" style="display:none">
+      <div class="ref-table-title">Tabla de referencia</div>
+      <div id="cv-table-body"></div>
+    </div>
+  </div>
+
+</div><!-- .shell -->
+<script>
+// ─────────────────────────────────────────────────────────────────────────────
+// UTILS
+// ─────────────────────────────────────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+const val = id => parseFloat($(id)?.value) || 0;
+const valRaw = id => $(id)?.value;
+
+function fmtNum(n, sig = 10) {
+  if (!isFinite(n) || isNaN(n)) return 'Error';
+  if (n === 0) return '0';
+  const abs = Math.abs(n);
+  if (abs >= 1e12 || (abs < 1e-5 && abs > 0)) return parseFloat(n.toPrecision(sig)).toExponential(4);
+  return String(parseFloat(n.toPrecision(sig)));
+}
+function fmtMoney(n, dec = 2) {
+  if (!isFinite(n)) return 'N/A';
+  return n.toLocaleString('es-CL', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+}
+function fmtPct(n, dec = 4) {
+  if (!isFinite(n)) return 'N/A';
+  return parseFloat(n.toFixed(dec)) + '%';
+}
+function scaleFontSize(el, v) {
+  const len = String(v).replace(/[,.\-]/g,'').length;
+  el.style.fontSize = len > 12 ? '1.4rem' : len > 9 ? '1.9rem' : '';
+}
+function show(id)  { const e=$(id); if(e) e.style.display=''; }
+function hide(id)  { const e=$(id); if(e) e.style.display='none'; }
+function hasVal(id){ const v=valRaw(id); return v !== '' && v !== null && !isNaN(parseFloat(v)); }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MODE SWITCHING
+// ─────────────────────────────────────────────────────────────────────────────
+const MODES = ['basic','sci','fin','conv'];
+let currentMode = 'basic';
+function switchMode(m) {
+  MODES.forEach(id => {
+    $('tab-'+id)?.classList.toggle('active', id===m);
+    $('panel-'+id)?.classList.toggle('active', id===m);
+  });
+  currentMode = m;
+  if (m==='conv') cvInit();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// BASIC CALCULATOR
+// ─────────────────────────────────────────────────────────────────────────────
+let bState = { val:'0', expr:'', prev:null, op:null, next:false, mem:0 };
+function bRender() {
+  $('b-val').textContent = bState.val;
+  $('b-expr').textContent = bState.expr;
+  scaleFontSize($('b-val'), bState.val);
+}
+function bDigit(d) {
+  if (bState.next) { bState.val=d; bState.next=false; }
+  else if (bState.val==='0') bState.val=d;
+  else if (bState.val.length<15) bState.val+=d;
+  bRender();
+}
+function bDot() {
+  if (bState.next) { bState.val='0.'; bState.next=false; }
+  else if (!bState.val.includes('.')) bState.val+='.';
+  bRender();
+}
+function bApply(a,b,op) {
+  if(op==='+') return a+b; if(op==='-') return a-b;
+  if(op==='*') return a*b; if(op==='/') return b===0?NaN:a/b;
+  return b;
+}
+function bOp(op) {
+  const cur=parseFloat(bState.val);
+  if(bState.prev!==null && !bState.next){ const r=bApply(bState.prev,cur,bState.op); bState.val=fmtNum(r); bState.prev=r; }
+  else bState.prev=cur;
+  bState.op=op; bState.next=true;
+  const sym={'/':'÷','*':'×','-':'−','+':'+'};
+  bState.expr=fmtNum(bState.prev)+' '+(sym[op]||op);
+  bRender();
+}
+function bCalc() {
+  if(bState.op===null||bState.next) return;
+  const cur=parseFloat(bState.val);
+  const r=bApply(bState.prev,cur,bState.op);
+  const sym={'/':'÷','*':'×','-':'−','+':'+'};
+  bState.expr=fmtNum(bState.prev)+' '+(sym[bState.op]||bState.op)+' '+fmtNum(cur)+' =';
+  bState.val=fmtNum(r); bState.prev=null; bState.op=null; bState.next=true;
+  bRender();
+}
+function bClear() { bState={val:'0',expr:'',prev:null,op:null,next:false,mem:bState.mem}; bRender(); }
+function bSign()  { bState.val=fmtNum(-parseFloat(bState.val)); bRender(); }
+function bPct()   { bState.val=fmtNum(parseFloat(bState.val)/100); bRender(); }
+function memClear()  { bState.mem=0; }
+function memRecall() { bState.val=fmtNum(bState.mem); bState.next=false; bRender(); }
+function memAdd()    { bState.mem+=parseFloat(bState.val)||0; }
+function memSub()    { bState.mem-=parseFloat(bState.val)||0; }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SCIENTIFIC CALCULATOR
+// ─────────────────────────────────────────────────────────────────────────────
+let sState = { val:'0', expr:'', prev:null, op:null, next:false, angle:'deg' };
+function sRender() {
+  $('s-val').textContent=sState.val; $('s-expr').textContent=sState.expr;
+  scaleFontSize($('s-val'),sState.val);
+}
+function setAngle(m) {
+  sState.angle=m;
+  $('ang-deg').classList.toggle('active',m==='deg');
+  $('ang-rad').classList.toggle('active',m==='rad');
+}
+const toRad  = x => sState.angle==='deg' ? x*Math.PI/180 : x;
+const fromRad= x => sState.angle==='deg' ? x*180/Math.PI : x;
+function sDigit(d) {
+  if(sState.next){sState.val=d;sState.next=false;}
+  else if(sState.val==='0') sState.val=d;
+  else if(sState.val.length<15) sState.val+=d;
+  sRender();
+}
+function sDot() {
+  if(sState.next){sState.val='0.';sState.next=false;}
+  else if(!sState.val.includes('.')) sState.val+='.';
+  sRender();
+}
+function sApply(a,b,op){
+  if(op==='+') return a+b; if(op==='-') return a-b;
+  if(op==='*') return a*b; if(op==='/') return b===0?NaN:a/b;
+  if(op==='**') return Math.pow(a,b); if(op==='mod') return a%b;
+  return b;
+}
+function sOp(op){
+  const cur=parseFloat(sState.val);
+  if(sState.prev!==null&&!sState.next){const r=sApply(sState.prev,cur,sState.op);sState.val=fmtNum(r);sState.prev=r;}
+  else sState.prev=cur;
+  sState.op=op;sState.next=true;
+  const sym={'/':'÷','*':'×','-':'−','+':'+','**':'ʸ','mod':'mod'};
+  sState.expr=fmtNum(sState.prev)+' '+(sym[op]||op);
+  sRender();
+}
+function sCalc(){
+  if(sState.op===null||sState.next) return;
+  const cur=parseFloat(sState.val);
+  const r=sApply(sState.prev,cur,sState.op);
+  const sym={'/':'÷','*':'×','-':'−','+':'+','**':'ʸ','mod':'mod'};
+  sState.expr=fmtNum(sState.prev)+' '+(sym[sState.op]||sState.op)+' '+fmtNum(cur)+' =';
+  sState.val=fmtNum(r);sState.prev=null;sState.op=null;sState.next=true;
+  sRender();
+}
+function sClear(){sState={val:'0',expr:'',prev:null,op:null,next:false,angle:sState.angle};sRender();}
+function sSign(){sState.val=fmtNum(-parseFloat(sState.val));sRender();}
+function sPct(){sState.val=fmtNum(parseFloat(sState.val)/100);sRender();}
+function sMod(){sOp('mod');}
+function sBksp(){sState.val=sState.val.length>1?sState.val.slice(0,-1):'0';sRender();}
+function factorial(n){return n<=1?1:n*factorial(n-1);}
+function sFunc(fn){
+  const x=parseFloat(sState.val); let r,label;
+  try{
+    switch(fn){
+      case 'sin':   r=Math.sin(toRad(x));    label=`sin(${x})`; break;
+      case 'cos':   r=Math.cos(toRad(x));    label=`cos(${x})`; break;
+      case 'tan':   r=Math.tan(toRad(x));    label=`tan(${x})`; break;
+      case 'asin':  r=fromRad(Math.asin(x)); label=`asin(${x})`; break;
+      case 'acos':  r=fromRad(Math.acos(x)); label=`acos(${x})`; break;
+      case 'atan':  r=fromRad(Math.atan(x)); label=`atan(${x})`; break;
+      case 'log':   r=Math.log10(x);  label=`log(${x})`; break;
+      case 'log2':  r=Math.log2(x);   label=`log₂(${x})`; break;
+      case 'ln':    r=Math.log(x);    label=`ln(${x})`; break;
+      case 'pow2':  r=x*x;            label=`(${x})²`; break;
+      case 'pow3':  r=x*x*x;          label=`(${x})³`; break;
+      case 'sqrt':  r=Math.sqrt(x);   label=`√(${x})`; break;
+      case 'cbrt':  r=Math.cbrt(x);   label=`∛(${x})`; break;
+      case '10x':   r=Math.pow(10,x); label=`10^${x}`; break;
+      case 'ex':    r=Math.exp(x);    label=`e^${x}`; break;
+      case 'fact':
+        if(x<0||!Number.isInteger(x)||x>170){sState.val='Error';sRender();return;}
+        r=factorial(x); label=`${x}!`; break;
+      case 'pi':     r=Math.PI; label='π'; break;
+      case 'eConst': r=Math.E;  label='e'; break;
+      case 'inv': case 'recip': r=1/x; label=`1/(${x})`; break;
+      case 'abs':  r=Math.abs(x); label=`|${x}|`; break;
+      default: return;
+    }
+    sState.expr=label; sState.val=fmtNum(r); sState.next=false; sRender();
+  }catch(e){sState.val='Error';sRender();}
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FINANCIAL — sub-tab switching
+// ─────────────────────────────────────────────────────────────────────────────
+const FIN_TABS = ['tvm','loan','savings','npv','deprec','rates','margins','daily'];
+function switchFin(sub) {
+  FIN_TABS.forEach(id=>{
+    $('ftab-'+id)?.classList.toggle('active',id===sub);
+    $('fpanel-'+id)?.classList.toggle('active',id===sub);
+  });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TVM — Time Value of Money (HP 12C / BA II Plus style)
+// ─────────────────────────────────────────────────────────────────────────────
+let tvmType = 0; // 0=END, 1=BEGIN
+
+function setTvmMode(m) {
+  tvmType = m==='beg' ? 1 : 0;
+  $('tvm-end').classList.toggle('active', m==='end');
+  $('tvm-beg').classList.toggle('active', m==='beg');
+}
+function tvmClear() { ['tvm-n','tvm-iy','tvm-pv','tvm-pmt','tvm-fv'].forEach(id=>$(id).value=''); hide('tvm-result'); }
+
+function tvmAF(r, N) { // annuity factor
+  if (Math.abs(r) < 1e-12) return N;
+  return ((1+r)**N - 1) / r;
+}
+function tvmFV(N,r,PV,PMT,type) {
+  if(Math.abs(r)<1e-12) return -(PV+PMT*N);
+  return -(PV*(1+r)**N + PMT*(1+r)**type*tvmAF(r,N));
+}
+function tvmPV(N,r,PMT,FV,type) {
+  if(Math.abs(r)<1e-12) return -(PMT*N+FV);
+  return -(PMT*(1+r)**type*tvmAF(r,N)+FV)/(1+r)**N;
+}
+function tvmPMT(N,r,PV,FV,type) {
+  if(Math.abs(r)<1e-12) return Math.abs(N)<1e-12?NaN:-(PV+FV)/N;
+  const f=(1+r)**type*tvmAF(r,N);
+  return Math.abs(f)<1e-12?NaN:-(PV*(1+r)**N+FV)/f;
+}
+function tvmN(r,PV,PMT,FV,type) {
+  if(Math.abs(r)<1e-12) return Math.abs(PMT)<1e-12?NaN:-(PV+FV)/PMT;
+  const pmt2=PMT*(1+r)**type;
+  const a=pmt2/r-FV, b=pmt2/r+PV;
+  if(a/b<=0) return NaN;
+  return Math.log(a/b)/Math.log(1+r);
+}
+function tvmRate(N,PV,PMT,FV,type) {
+  function f(r){ return Math.abs(r)<1e-12?PV+PMT*N+FV:PV*(1+r)**N+PMT*(1+r)**type*tvmAF(r,N)+FV; }
+  const guesses=[0.001,0.005,0.01,0.02,0.05,0.1,-0.001,-0.005,-0.01];
+  for(const g of guesses){
+    let r=g;
+    for(let i=0;i<300;i++){
+      const fr=f(r), dr=1e-7;
+      const dfr=(f(r+dr)-fr)/dr;
+      if(Math.abs(dfr)<1e-15) break;
+      const rn=r-fr/dfr;
+      if(!isFinite(rn)) break;
+      if(Math.abs(rn-r)<1e-12){r=rn; if(r>-1&&r<10) return r; break;}
+      r=rn; if(!isFinite(r)) break;
+    }
+  }
+  return NaN;
+}
+
+function tvmSolve(target) {
+  const PY = parseFloat($('tvm-py').value)||12;
+  const nv=valRaw('tvm-n'), iv=valRaw('tvm-iy'), pv=valRaw('tvm-pv'),
+        pmtv=valRaw('tvm-pmt'), fvv=valRaw('tvm-fv');
+
+  let N=parseFloat(nv), IY=parseFloat(iv), PV=parseFloat(pv),
+      PMT=parseFloat(pmtv)||0, FV=parseFloat(fvv)||0;
+
+  hide('tvm-result');
+  let result, label, note='';
+
+  try {
+    if(target==='FV') {
+      if(!hasVal('tvm-n')||!hasVal('tvm-iy')||!hasVal('tvm-pv')) return alert('Faltan: N, I/Y, PV');
+      const r=(IY/100)/PY;
+      result=tvmFV(N,r,PV,PMT,tvmType);
+      label='Valor Futuro (FV)';
+    } else if(target==='PV') {
+      if(!hasVal('tvm-n')||!hasVal('tvm-iy')||!hasVal('tvm-fv')) return alert('Faltan: N, I/Y, FV');
+      const r=(IY/100)/PY;
+      result=tvmPV(N,r,PMT,FV,tvmType);
+      label='Valor Actual (PV)';
+    } else if(target==='PMT') {
+      if(!hasVal('tvm-n')||!hasVal('tvm-iy')||!hasVal('tvm-pv')||!hasVal('tvm-fv')) return alert('Faltan: N, I/Y, PV, FV');
+      const r=(IY/100)/PY;
+      result=tvmPMT(N,r,PV,FV,tvmType);
+      label='Pago periódico (PMT)';
+    } else if(target==='N') {
+      if(!hasVal('tvm-iy')||!hasVal('tvm-pv')||!hasVal('tvm-fv')) return alert('Faltan: I/Y, PV, FV');
+      const r=(IY/100)/PY;
+      result=tvmN(r,PV,PMT,FV,tvmType);
+      label='Número de períodos (N)';
+      note=`≈ ${fmtMoney(result/PY,2)} años`;
+    } else if(target==='IY') {
+      if(!hasVal('tvm-n')||!hasVal('tvm-pv')||!hasVal('tvm-fv')) return alert('Faltan: N, PV, FV');
+      const r=tvmRate(N,PV,PMT,FV,tvmType);
+      result=r*PY*100;
+      label='Tasa anual I/Y (%)';
+      note=`Tasa periódica: ${fmtMoney(r*100,6)}%`;
+    }
+
+    if(!isFinite(result)||isNaN(result)){ alert('Sin solución con los datos ingresados.'); return; }
+    $('tvm-result-label').textContent=label;
+    $('tvm-result-val').textContent=(target==='IY'||target==='N')?fmtMoney(result,6):'$'+fmtMoney(result,2);
+    $('tvm-result-note').textContent=note;
+    show('tvm-result'); $('tvm-result').classList.add('show');
+    // Auto-fill solved field
+    const ids={FV:'tvm-fv',PV:'tvm-pv',PMT:'tvm-pmt',N:'tvm-n',IY:'tvm-iy'};
+    if(ids[target]) $(ids[target]).value=parseFloat(result.toFixed(6));
+  } catch(e){ alert('Error en el cálculo.'); }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// LOAN / AMORTIZATION
+// ─────────────────────────────────────────────────────────────────────────────
+function calcLoan() {
+  const P=val('lo-amount'), r_ann=val('lo-rate'), months=val('lo-months');
+  const freq=parseFloat($('lo-freq').value)||12, extra=val('lo-extra');
+  if(!P||!r_ann||!months){ hide('lo-result'); hide('lo-table-wrap'); return; }
+  const r=r_ann/100/freq;
+  const n=months*(freq/12);
+  const pmt=r===0?P/n:P*r*Math.pow(1+r,n)/(Math.pow(1+r,n)-1);
+
+  // Standard amortization
+  let bal=P, totInt=0, rows=[];
+  for(let i=1;i<=n;i++){
+    const intPmt=bal*r, capPmt=pmt-intPmt;
+    totInt+=intPmt;
+    bal-=capPmt;
+    if(bal<0.005) bal=0;
+    rows.push({per:i,balIni:bal+capPmt,pmt,intPmt,capPmt,balFin:bal});
+    if(bal===0) break;
+  }
+
+  // With extra payment
+  let bal2=P, periods2=0;
+  if(extra>0){
+    while(bal2>0.005 && periods2<n*2){
+      periods2++;
+      const intPmt=bal2*r, capPmt=Math.min(pmt+extra-intPmt,bal2);
+      bal2-=capPmt; if(bal2<0.005) bal2=0;
+    }
+  }
+
+  show('lo-result'); show('lo-table-wrap');
+  $('lo-pmt').textContent='$'+fmtMoney(pmt);
+  $('lo-pmt-total').textContent='$'+fmtMoney(pmt+extra);
+  $('lo-interest').textContent='$'+fmtMoney(totInt);
+  $('lo-total').textContent='$'+fmtMoney(P+totInt);
+  $('lo-cost-pct').textContent=fmtMoney((totInt/P)*100,2)+'%';
+  $('lo-periods-saved').textContent=extra>0?`Ahorra ${Math.max(0,Math.ceil(n-periods2))} per.`:'—';
+
+  // Build table
+  const tbody=$('lo-tbody'); tbody.innerHTML='';
+  let sumInt=0, sumCap=0;
+  rows.forEach(row=>{
+    sumInt+=row.intPmt; sumCap+=row.capPmt;
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${row.per}</td><td>$${fmtMoney(row.balIni)}</td><td>$${fmtMoney(row.pmt)}</td>
+      <td style="color:var(--red)">$${fmtMoney(row.intPmt)}</td>
+      <td style="color:var(--green)">$${fmtMoney(row.capPmt)}</td>
+      <td>$${fmtMoney(row.balFin)}</td>`;
+    tbody.appendChild(tr);
+  });
+  $('lo-tfoot').innerHTML=`<tr><td>Total</td><td></td><td>$${fmtMoney(P+totInt)}</td>
+    <td style="color:var(--red)">$${fmtMoney(sumInt)}</td>
+    <td style="color:var(--green)">$${fmtMoney(sumCap)}</td><td></td></tr>`;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SAVINGS / INVESTMENT
+// ─────────────────────────────────────────────────────────────────────────────
+function calcSavings() {
+  const PV0=val('sv-pv'), pmt=val('sv-pmt'), rAnn=val('sv-rate');
+  const years=val('sv-years'), freq=parseFloat($('sv-freq').value)||12;
+  const goal=val('sv-goal');
+  if(!rAnn||!years){ hide('sv-result'); return; }
+
+  const r=rAnn/100/freq, n=years*freq;
+  const fvLump=PV0*(1+r)**n;
+  const fvPmt=r===0?pmt*n:pmt*((1+r)**n-1)/r;
+  const FV=fvLump+fvPmt;
+  const contributed=PV0+pmt*n;
+
+  show('sv-result');
+  $('sv-fv').textContent='$'+fmtMoney(FV);
+  $('sv-int').textContent='$'+fmtMoney(FV-contributed);
+  $('sv-contributed').textContent='$'+fmtMoney(contributed);
+  $('sv-ret').textContent=fmtMoney(((FV-contributed)/contributed)*100,2)+'%';
+
+  if(goal>0){
+    show('sv-goal-row');
+    // PMT needed
+    const pmtNeeded=r===0?(goal-fvLump)/n:((goal-fvLump)*r)/((1+r)**n-1);
+    // Years needed (with current pmt)
+    let yearsNeeded=NaN;
+    if(pmt>0||PV0>0){
+      if(r===0){ yearsNeeded=(goal-PV0)/(pmt*freq)/freq; }
+      else {
+        const a=pmt/r, b=PV0+a;
+        if(b>0) yearsNeeded=Math.log(goal/b+a/b)/Math.log(1+r)/freq;
+      }
+    }
+    $('sv-pmt-needed').textContent=pmtNeeded>0?'$'+fmtMoney(pmtNeeded):'Meta ya alcanzada';
+    $('sv-years-needed').textContent=isFinite(yearsNeeded)&&yearsNeeded>0?fmtMoney(yearsNeeded,1)+' años':'—';
+  } else { hide('sv-goal-row'); }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// NPV / IRR
+// ─────────────────────────────────────────────────────────────────────────────
+let cfCount=0;
+function addCF(v='') {
+  cfCount++;
+  const div=document.createElement('div');
+  div.className='cf-row'; div.id='cf-row-'+cfCount;
+  div.innerHTML=`<span class="cf-period">${cfCount}</span>
+    <input type="number" id="cf-${cfCount}" placeholder="Flujo período ${cfCount}" oninput="calcNPV()">
+    <button class="cf-del" onclick="delCF(${cfCount})">×</button>`;
+  $('npv-flows').appendChild(div);
+  if(v!=='') $('cf-'+cfCount).value=v;
+  calcNPV();
+}
+function delCF(id){ const r=$('cf-row-'+id); if(r){r.remove(); calcNPV();} }
+
+function getCFs() {
+  const cfs=[val('npv-cf0')];
+  $('npv-flows').querySelectorAll('input[type="number"]').forEach(inp=>cfs.push(parseFloat(inp.value)||0));
+  return cfs;
+}
+function computeNPV(rate,cfs){ return cfs.reduce((s,cf,t)=>s+cf/Math.pow(1+rate,t),0); }
+function computeIRR(cfs) {
+  const guesses=[-0.5,-0.2,-0.05,0,0.05,0.1,0.2,0.5,1,2];
+  for(const g of guesses){
+    let r=g;
+    for(let i=0;i<500;i++){
+      let npv=0,dnpv=0;
+      for(let t=0;t<cfs.length;t++){
+        const fac=Math.pow(1+r,t);
+        npv+=cfs[t]/fac;
+        dnpv-=t*cfs[t]/(fac*(1+r));
+      }
+      if(Math.abs(dnpv)<1e-15) break;
+      const delta=npv/dnpv; r-=delta;
+      if(!isFinite(r)) break;
+      if(Math.abs(delta)<1e-10&&r>-1&&r<100) return r;
+    }
+  }
+  return NaN;
+}
+function calcNPV() {
+  const rate=val('npv-rate')/100;
+  const cfs=getCFs();
+  if(cfs.length<2){ hide('npv-result'); return; }
+  const npv=computeNPV(rate,cfs);
+  const irr=computeIRR(cfs);
+  const inv=Math.abs(cfs[0]);
+  const pi=inv>0?npv/inv+1:NaN;
+  // Payback
+  let cum=0,payback=NaN;
+  for(let t=0;t<cfs.length;t++){cum+=cfs[t];if(cum>=0&&payback===NaN){payback=t;break;}}
+  const net=cfs.reduce((a,b)=>a+b,0);
+  show('npv-result');
+  $('npv-val').textContent='$'+fmtMoney(npv);
+  $('npv-val').style.color=npv>=0?'var(--green)':'var(--red)';
+  $('npv-irr').textContent=isFinite(irr)?fmtPct(irr*100,2):'N/A';
+  $('npv-pi').textContent=isFinite(pi)?parseFloat(pi.toFixed(4)):'—';
+  $('npv-payback').textContent=isFinite(payback)?`Período ${payback}`:'> horizonte';
+  $('npv-net').textContent='$'+fmtMoney(net);
+  $('npv-decision').textContent=npv>0?'✅ Aceptar':'❌ Rechazar';
+  $('npv-decision').style.color=npv>0?'var(--green)':'var(--red)';
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DEPRECIATION
+// ─────────────────────────────────────────────────────────────────────────────
+function calcDepreciation() {
+  const cost=val('dep-cost'), salvage=val('dep-salvage'), life=val('dep-life');
+  const method=$('dep-method').value;
+  if(!cost||!life){ hide('dep-summary'); hide('dep-table-wrap'); return; }
+  const depBase=cost-salvage;
+
+  let schedule=[];
+  for(let yr=1;yr<=life;yr++){
+    let d;
+    if(method==='sln') {
+      d=depBase/life;
+    } else if(method==='syd') {
+      const SYD=life*(life+1)/2;
+      d=depBase*(life-yr+1)/SYD;
+    } else if(method==='ddb') {
+      const rate=2/life;
+      const bookPrev=yr===1?cost:schedule[yr-2].bookVal;
+      d=Math.min(bookPrev*rate,bookPrev-salvage);
+      if(d<0)d=0;
+    } else { // db
+      const rate=1-Math.pow(salvage/cost,1/life);
+      const bookPrev=yr===1?cost:schedule[yr-2].bookVal;
+      d=bookPrev*rate;
+    }
+    const prev=yr===1?cost:schedule[yr-2].bookVal;
+    const accum=(yr===1?0:schedule[yr-2].accum)+d;
+    schedule.push({yr,dep:d,accum,bookVal:prev-d});
+  }
+
+  show('dep-summary'); show('dep-table-wrap');
+  $('dep-y1').textContent='$'+fmtMoney(schedule[0].dep);
+  $('dep-total').textContent='$'+fmtMoney(schedule[schedule.length-1].accum);
+
+  const tbody=$('dep-tbody'); tbody.innerHTML='';
+  schedule.forEach(row=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${row.yr}</td>
+      <td style="color:var(--accent2)">$${fmtMoney(row.dep)}</td>
+      <td>$${fmtMoney(row.accum)}</td>
+      <td>$${fmtMoney(row.bookVal)}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// RATE CONVERSIONS
+// ─────────────────────────────────────────────────────────────────────────────
+function calcRates() {
+  const nom=val('rt-nom'), cap=parseFloat($('rt-cap').value)||12;
+  if(!nom){ hide('rt-result1'); return; }
+  const r=nom/100;
+  const periodic=r/cap;
+  const tea=Math.pow(1+periodic,cap)-1;
+  const daily=Math.pow(1+tea,1/365)-1;
+  const apy=tea;
+  show('rt-result1');
+  $('rt-tea').textContent=fmtPct(tea*100,4);
+  $('rt-periodic').textContent=fmtPct(periodic*100,6);
+  $('rt-daily').textContent=fmtPct(daily*100,6);
+  $('rt-apy').textContent=fmtPct(apy*100,4);
+}
+function calcRateConvert() {
+  const known=val('rt-known'), period=parseFloat($('rt-known-period').value)||12;
+  if(!known){ hide('rt-result2'); return; }
+  // Convert known rate (in its period) to effective annual
+  const tea=Math.pow(1+known/100,period)-1;
+  show('rt-result2');
+  const periods={1:1,2:2,4:4,12:12,52:52,365:365};
+  const labels={'rt-c-annual':1,'rt-c-semi':2,'rt-c-quarterly':4,'rt-c-monthly':12,'rt-c-weekly':52,'rt-c-daily':365};
+  Object.entries(labels).forEach(([id,p])=>{
+    const r=(Math.pow(1+tea,1/p)-1)*100;
+    $(id).textContent=fmtPct(r,p>=52?6:4);
+  });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MARGINS / BREAK-EVEN / ROI / CAGR
+// ─────────────────────────────────────────────────────────────────────────────
+function calcMargins() {
+  const cost=val('mg-cost'), price=val('mg-price');
+  if(!cost||!price){ hide('mg-result'); return; }
+  const profit=price-cost;
+  const margin=(profit/price)*100;
+  const markup=(profit/cost)*100;
+  const price30=cost/(1-0.30);
+  show('mg-result');
+  $('mg-margin').textContent=fmtMoney(margin,2)+'%';
+  $('mg-markup').textContent=fmtMoney(markup,2)+'%';
+  $('mg-profit').textContent='$'+fmtMoney(profit);
+  $('mg-price30').textContent='$'+fmtMoney(price30);
+}
+function calcBreakeven() {
+  const fixed=val('be-fixed'), price=val('be-price'), varUnit=val('be-varunit');
+  if(!fixed||!price||price<=varUnit){ hide('be-result'); return; }
+  const contrib=price-varUnit;
+  const units=fixed/contrib;
+  const rev=units*price;
+  const mcRatio=contrib/price;
+  show('be-result');
+  $('be-units').textContent=fmtMoney(units,2)+' uds.';
+  $('be-revenue').textContent='$'+fmtMoney(rev);
+  $('be-contrib').textContent='$'+fmtMoney(contrib)+'/ud.';
+  $('be-mc-ratio').textContent=fmtMoney(mcRatio*100,2)+'%';
+}
+function calcROICAGR() {
+  const init=val('rc-init'), final=val('rc-final'), years=val('rc-years');
+  if(!init||!final){ hide('rc-result'); return; }
+  const roi=((final-init)/init)*100;
+  const cagr=years>0?(Math.pow(final/init,1/years)-1)*100:NaN;
+  const net=final-init;
+  const mult=final/init;
+  show('rc-result');
+  $('rc-roi').textContent=fmtMoney(roi,2)+'%';
+  $('rc-cagr').textContent=isFinite(cagr)?fmtMoney(cagr,2)+'%':'—';
+  $('rc-net').textContent='$'+fmtMoney(net);
+  $('rc-mult').textContent=fmtMoney(mult,4)+'x';
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DAILY CALCULATORS
+// ─────────────────────────────────────────────────────────────────────────────
+function setTip(p){ $('tp-pct').value=p; calcTip(); }
+function calcTip() {
+  const bill=val('tp-bill'), pct=val('tp-pct'), ppl=parseInt($('tp-ppl')?.value)||1;
+  if(!bill||!pct){ hide('tp-result'); return; }
+  const tip=bill*pct/100, tot=bill+tip;
+  show('tp-result');
+  $('tp-tip').textContent='$'+fmtMoney(tip);
+  $('tp-total').textContent='$'+fmtMoney(tot);
+  $('tp-pp').textContent='$'+fmtMoney(tot/ppl);
+  $('tp-tipp').textContent='$'+fmtMoney(tip/ppl);
+}
+function calcDiscount() {
+  const orig=val('dc-orig'), pct=val('dc-pct');
+  if(!orig||!pct){ hide('dc-result'); return; }
+  const save=orig*pct/100;
+  const net=orig/(1+pct/100);
+  show('dc-result');
+  $('dc-final').textContent='$'+fmtMoney(orig-save);
+  $('dc-save').textContent='$'+fmtMoney(save);
+  $('dc-with-tax').textContent='$'+fmtMoney(orig+save);
+  $('dc-net').textContent='$'+fmtMoney(net);
+}
+function calcPctChange() {
+  const before=val('pv-before'), after=val('pv-after');
+  if(!before){ hide('pv-result'); return; }
+  const pct=((after-before)/before)*100;
+  const diff=after-before;
+  show('pv-result');
+  $('pv-pct').textContent=(pct>=0?'+':'')+fmtMoney(pct,2)+'%';
+  $('pv-pct').style.color=pct>=0?'var(--green)':'var(--red)';
+  $('pv-diff').textContent=(diff>=0?'+':'')+fmtMoney(diff);
+  $('pv-diff').style.color=diff>=0?'var(--green)':'var(--red)';
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// UNIT CONVERTER
+// ─────────────────────────────────────────────────────────────────────────────
+const CV = {
+  length:{label:'Longitud',units:[
+    {k:'m',l:'Metro (m)',f:1},{k:'km',l:'Kilómetro (km)',f:1e3},{k:'cm',l:'Centímetro (cm)',f:0.01},
+    {k:'mm',l:'Milímetro (mm)',f:0.001},{k:'um',l:'Micrómetro (μm)',f:1e-6},{k:'nm',l:'Nanómetro (nm)',f:1e-9},
+    {k:'mi',l:'Milla (mi)',f:1609.344},{k:'yd',l:'Yarda (yd)',f:0.9144},{k:'ft',l:'Pie (ft)',f:0.3048},
+    {k:'in',l:'Pulgada (in)',f:0.0254},{k:'nmi',l:'Milla náutica',f:1852},{k:'ly',l:'Año luz',f:9.461e15}]},
+  weight:{label:'Peso / Masa',units:[
+    {k:'kg',l:'Kilogramo (kg)',f:1},{k:'g',l:'Gramo (g)',f:0.001},{k:'mg',l:'Miligramo (mg)',f:1e-6},
+    {k:'t',l:'Tonelada (t)',f:1000},{k:'lb',l:'Libra (lb)',f:0.45359237},{k:'oz',l:'Onza (oz)',f:0.02834952},
+    {k:'st',l:'Stone (st)',f:6.35029},{k:'ton_us',l:'Ton corta US',f:907.185},{k:'ton_uk',l:'Ton larga UK',f:1016.05}]},
+  temperature:{label:'Temperatura',special:'temp',units:[
+    {k:'C',l:'Celsius (°C)'},{k:'F',l:'Fahrenheit (°F)'},{k:'K',l:'Kelvin (K)'},{k:'R',l:'Rankine (°R)'}]},
+  area:{label:'Área',units:[
+    {k:'m2',l:'Metro² (m²)',f:1},{k:'km2',l:'Kilómetro² (km²)',f:1e6},{k:'cm2',l:'Centímetro² (cm²)',f:1e-4},
+    {k:'ha',l:'Hectárea (ha)',f:10000},{k:'ac',l:'Acre (ac)',f:4046.86},{k:'ft2',l:'Pie² (ft²)',f:0.092903},
+    {k:'in2',l:'Pulgada² (in²)',f:6.4516e-4},{k:'mi2',l:'Milla² (mi²)',f:2.589988e6},{k:'yd2',l:'Yarda² (yd²)',f:0.836127}]},
+  volume:{label:'Volumen',units:[
+    {k:'L',l:'Litro (L)',f:1},{k:'mL',l:'Mililitro (mL)',f:0.001},{k:'m3',l:'Metro³ (m³)',f:1000},
+    {k:'gal_us',l:'Galón US',f:3.78541},{k:'gal_uk',l:'Galón UK',f:4.54609},{k:'fl_oz',l:'Onza líq. US',f:0.0295735},
+    {k:'pt',l:'Pinta US (pt)',f:0.473176},{k:'qt',l:'Cuarto US (qt)',f:0.946353},{k:'cup',l:'Taza US',f:0.236588},
+    {k:'ft3',l:'Pie³ (ft³)',f:28.3168},{k:'bbl',l:'Barril petróleo',f:158.987}]},
+  speed:{label:'Velocidad',units:[
+    {k:'ms',l:'Metro/seg (m/s)',f:1},{k:'kmh',l:'km/hora (km/h)',f:1/3.6},{k:'mph',l:'Milla/hora (mph)',f:0.44704},
+    {k:'kn',l:'Nudo (kn)',f:0.514444},{k:'fts',l:'Pie/seg (ft/s)',f:0.3048},{k:'mach',l:'Mach (~20°C)',f:343},
+    {k:'c',l:'Vel. de la luz',f:2.99792458e8}]},
+  pressure:{label:'Presión',units:[
+    {k:'Pa',l:'Pascal (Pa)',f:1},{k:'kPa',l:'Kilopascal (kPa)',f:1e3},{k:'MPa',l:'Megapascal (MPa)',f:1e6},
+    {k:'bar',l:'Bar',f:1e5},{k:'mbar',l:'Milibar',f:100},{k:'atm',l:'Atmósfera (atm)',f:101325},
+    {k:'psi',l:'PSI',f:6894.76},{k:'mmHg',l:'mmHg / Torr',f:133.322},{k:'inHg',l:'Pulgada Hg',f:3386.39}]},
+  energy:{label:'Energía',units:[
+    {k:'J',l:'Julio (J)',f:1},{k:'kJ',l:'Kilojulio (kJ)',f:1e3},{k:'MJ',l:'Megajulio (MJ)',f:1e6},
+    {k:'cal',l:'Caloría (cal)',f:4.184},{k:'kcal',l:'Kilocaloría',f:4184},{k:'Wh',l:'Vatio·hora (Wh)',f:3600},
+    {k:'kWh',l:'kVatio·hora (kWh)',f:3600000},{k:'BTU',l:'BTU',f:1055.06}]},
+  power:{label:'Potencia',units:[
+    {k:'W',l:'Vatio (W)',f:1},{k:'kW',l:'Kilovatio (kW)',f:1e3},{k:'MW',l:'Megavatio (MW)',f:1e6},
+    {k:'hp',l:'CV/HP',f:745.7},{k:'BTUh',l:'BTU/hora',f:0.293071},{k:'kcal_h',l:'kcal/hora',f:1.163}]},
+  data:{label:'Datos digitales',units:[
+    {k:'bit',l:'Bit',f:1},{k:'B',l:'Byte (B)',f:8},{k:'KB',l:'Kilobyte (KB)',f:8e3},
+    {k:'MB',l:'Megabyte (MB)',f:8e6},{k:'GB',l:'Gigabyte (GB)',f:8e9},{k:'TB',l:'Terabyte (TB)',f:8e12},
+    {k:'PB',l:'Petabyte (PB)',f:8e15},{k:'KiB',l:'Kibibyte (KiB)',f:8192},{k:'MiB',l:'Mebibyte (MiB)',f:8388608},
+    {k:'GiB',l:'Gibibyte (GiB)',f:8589934592}]},
+  time:{label:'Tiempo',units:[
+    {k:'ns',l:'Nanosegundo (ns)',f:1e-9},{k:'us',l:'Microsegundo (μs)',f:1e-6},{k:'ms',l:'Milisegundo (ms)',f:0.001},
+    {k:'s',l:'Segundo (s)',f:1},{k:'min',l:'Minuto (min)',f:60},{k:'h',l:'Hora (h)',f:3600},
+    {k:'d',l:'Día (d)',f:86400},{k:'wk',l:'Semana',f:604800},{k:'mo',l:'Mes (30d)',f:2592000},
+    {k:'yr',l:'Año (365d)',f:31536000}]},
+  angle:{label:'Ángulo',units:[
+    {k:'deg',l:'Grado (°)',f:1},{k:'rad',l:'Radián (rad)',f:180/Math.PI},{k:'grad',l:'Gradián',f:0.9},
+    {k:'turn',l:'Vuelta completa',f:360},{k:'arcmin',l:"Minuto arco (')",f:1/60},{k:'arcsec',l:'Segundo arco (")',f:1/3600}]},
+  fuel:{label:'Combustible',special:'fuel',units:[
+    {k:'L100',l:'L/100 km'},{k:'km_L',l:'km/L'},{k:'mpg_us',l:'MPG (US)'},{k:'mpg_uk',l:'MPG (UK)'}]},
+};
+const cvOrder=['length','weight','temperature','area','volume','speed','pressure','energy','power','data','time','angle','fuel'];
+const cvLabels={length:'📏 Longitud',weight:'⚖️ Peso/Masa',temperature:'🌡️ Temperatura',area:'▪ Área',
+  volume:'🫙 Volumen',speed:'💨 Velocidad',pressure:'🔵 Presión',energy:'⚡ Energía',
+  power:'🔋 Potencia',data:'💾 Datos',time:'⏱️ Tiempo',angle:'📐 Ángulo',fuel:'⛽ Combustible'};
+
+function tempToK(v,u){if(u==='C')return v+273.15;if(u==='F')return(v+459.67)*5/9;if(u==='K')return v;if(u==='R')return v*5/9;}
+function tempFromK(v,u){if(u==='C')return v-273.15;if(u==='F')return v*9/5-459.67;if(u==='K')return v;if(u==='R')return v*9/5;}
+function fuelToBase(v,u){if(u==='L100')return v;if(u==='km_L')return 100/v;if(u==='mpg_us')return 235.215/v;if(u==='mpg_uk')return 282.481/v;}
+function fuelFromBase(v,u){if(u==='L100')return v;if(u==='km_L')return 100/v;if(u==='mpg_us')return 235.215/v;if(u==='mpg_uk')return 282.481/v;}
+
+function cvInit() {
+  const catSel=$('cv-cat');
+  if(!catSel.children.length) cvOrder.forEach(k=>{catSel.add(new Option(cvLabels[k],k));});
+  const cat=catSel.value, data=CV[cat];
+  const fromSel=$('cv-from'), toSel=$('cv-to');
+  fromSel.innerHTML=toSel.innerHTML='';
+  data.units.forEach((u,i)=>{fromSel.add(new Option(u.l,u.k));toSel.add(new Option(u.l,u.k));});
+  if(data.units.length>1) toSel.selectedIndex=1;
+  $('cv-in').value=$('cv-out').value=''; $('cv-formula').textContent=''; hide('cv-table');
+}
+function cvDoConvert(v,cat,fk,tk){
+  const data=CV[cat];
+  if(data.special==='temp') return tempFromK(tempToK(v,fk),tk);
+  if(data.special==='fuel') return fuelFromBase(fuelToBase(v,fk),tk);
+  const fu=data.units.find(u=>u.k===fk), tu=data.units.find(u=>u.k===tk);
+  return v*fu.f/tu.f;
+}
+function cvConvert(){
+  const v=parseFloat($('cv-in').value), cat=$('cv-cat').value;
+  const fk=$('cv-from').value, tk=$('cv-to').value, data=CV[cat];
+  if(isNaN(v)){$('cv-out').value='';$('cv-formula').textContent='';hide('cv-table');return;}
+  const r=cvDoConvert(v,cat,fk,tk);
+  const fmt=fmtNum(r);
+  $('cv-out').value=fmt;
+  const fl=data.units.find(u=>u.k===fk)?.l||fk, tl=data.units.find(u=>u.k===tk)?.l||tk;
+  $('cv-formula').textContent=`${v} ${fl} = ${fmt} ${tl}`;
+  if(!data.special){
+    const fu=data.units.find(u=>u.k===fk);
+    const body=$('cv-table-body'); body.innerHTML='';
+    data.units.forEach(u=>{
+      if(u.k===fk)return;
+      const row=document.createElement('div'); row.className='ref-row';
+      row.innerHTML=`<span class="ref-unit">${u.l}</span><span>${fmtNum(v*fu.f/u.f,8)}</span>`;
+      body.appendChild(row);
+    });
+    show('cv-table');
+  } else hide('cv-table');
+}
+function cvReverse(){
+  const v=parseFloat($('cv-out').value);
+  if(isNaN(v)){$('cv-in').value='';return;}
+  $('cv-in').value=fmtNum(cvDoConvert(v,$('cv-cat').value,$('cv-to').value,$('cv-from').value));
+}
+function cvSwap(){
+  const f=$('cv-from'),t=$('cv-to'),fi=$('cv-in'),fo=$('cv-out');
+  [f.value,t.value]=[t.value,f.value];[fi.value,fo.value]=[fo.value,fi.value];cvConvert();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// KEYBOARD
+// ─────────────────────────────────────────────────────────────────────────────
+document.addEventListener('keydown',e=>{
+  const tag=document.activeElement?.tagName;
+  if(tag==='INPUT'||tag==='SELECT') return;
+  if(currentMode==='basic'){
+    if(e.key>='0'&&e.key<='9') bDigit(e.key);
+    else if(e.key==='.') bDot();
+    else if(e.key==='+') bOp('+'); else if(e.key==='-') bOp('-');
+    else if(e.key==='*') bOp('*'); else if(e.key==='/'){e.preventDefault();bOp('/');}
+    else if(e.key==='Enter'||e.key==='=') bCalc();
+    else if(e.key==='Escape') bClear();
+    else if(e.key==='Backspace'){bState.val=bState.val.length>1?bState.val.slice(0,-1):'0';bRender();}
+    else if(e.key==='%') bPct();
+  } else if(currentMode==='sci'){
+    if(e.key>='0'&&e.key<='9') sDigit(e.key);
+    else if(e.key==='.') sDot();
+    else if(e.key==='+') sOp('+'); else if(e.key==='-') sOp('-');
+    else if(e.key==='*') sOp('*'); else if(e.key==='/'){e.preventDefault();sOp('/');}
+    else if(e.key==='Enter'||e.key==='=') sCalc();
+    else if(e.key==='Escape') sClear();
+    else if(e.key==='Backspace') sBksp();
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────────────────────────────────────
+bRender(); sRender();
+// Add 5 default cash flow rows for NPV
+[0,0,0,0,0].forEach(()=>addCF());
+</script>
+</body>
+</html>

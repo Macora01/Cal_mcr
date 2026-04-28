@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(open /Users/mariocollado/Prueba_1/index.html)"
+    ]
+  }
+}
